@@ -52,4 +52,5 @@ graph TD
 See [CHANGELOG.md](CHANGELOG.md) for version history
 
 ## License
-MIT
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+GNU General Public License v3.0 - See [LICENSE](LICENSE) for full text
