@@ -9,7 +9,7 @@ function loadDomains() {
         const li = document.createElement('li');
         li.innerHTML = `
           <span>${domain}</span>
-          <button class="remove-domain" data-domain="${domain}">×</button>
+          <button class="remove-domain" data-domain="${domain}" title="Remove domain">-</button>
         `;
         domainList.appendChild(li);
       });

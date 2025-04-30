@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.2.1] - 2025-04-29
+### Changed
+- Updated remove buttons to use minus sign (-) instead of x
+- Improved remove button styling for better visibility
+
 ## [1.2.0] - 2025-04-29
 ### Changed
 - Moved image upload functionality exclusively to manager page

@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Domain Blocker",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Blocks domains and shows a custom image instead",
   "permissions": ["storage", "webNavigation"],
   "background": {

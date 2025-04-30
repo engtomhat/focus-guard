@@ -10,7 +10,7 @@ function loadDomains() {
         div.className = 'domain-item';
         div.innerHTML = `
           <span>${domain}</span>
-          <button class="remove-btn" data-domain="${domain}">Remove</button>
+          <button class="remove-btn" data-domain="${domain}" title="Remove domain">-</button>
         `;
         domainList.appendChild(div);
       });
