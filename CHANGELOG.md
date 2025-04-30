@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.2.0] - 2025-04-29
+### Changed
+- Moved image upload functionality exclusively to manager page
+- Simplified popup interface
+
 ## [1.1.1] - 2025-04-29
 ### Fixed
 - Image storage using local storage instead of sync to avoid quota limits
