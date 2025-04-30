@@ -2,10 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.2.2] - 2025-04-29
+### Added
+- New centered logo in README
+- Visual preview of blocked domains in manager
+
 ## [1.2.1] - 2025-04-29
 ### Changed
 - Updated remove buttons to use minus sign (-) instead of x
 - Improved remove button styling for better visibility
+- Added new extension icons in all required sizes (16x16, 48x48, 128x128)
 
 ## [1.2.0] - 2025-04-29
 ### Changed

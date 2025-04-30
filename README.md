@@ -1,6 +1,9 @@
-# Domain Blocker Chrome Extension
+<div align="center">
+  <img src="images/icon128.png" width="128" alt="Domain Blocker Logo">
+  <h1>Domain Blocker Chrome Extension</h1>
+</div>
 
-Blocks specified domains and shows a custom image instead. Version 1.2.0
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
 ## Features
 
@@ -52,5 +55,4 @@ graph TD
 See [CHANGELOG.md](CHANGELOG.md) for version history
 
 ## License
-[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 GNU General Public License v3.0 - See [LICENSE](LICENSE) for full text
