@@ -44,6 +44,10 @@ graph TD
 - **Popup**: Quick domain management (click extension icon)
 - **Manager**: Full configuration (`Open Full Manager` link in popup)
 
+## Acknowledgements
+- This project was developed with assistance from AI coding tools
+- Special thanks to [Windsurf](https://windsurf.dev) and [DeepSeek](https://deepseek.com) for their coding assistance
+
 ## Changelog
 See [CHANGELOG.md](CHANGELOG.md) for version history
 
