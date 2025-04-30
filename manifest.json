@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Domain Blocker",
-  "version": "1.0",
+  "version": "1.1.1",
   "description": "Blocks domains and shows a custom image instead",
   "permissions": ["storage", "webNavigation"],
   "background": {
@@ -27,6 +27,7 @@
     "128": "images/icon128.png"
   },
   "web_accessible_resources": [{
-    "resources": ["blocked.html", "images/default-blocked.png"],
+    "resources": ["blocked.html", "manager.html", "images/default-blocked.png"],
     "matches": ["<all_urls>"]
-  }]}
+  }]
+}

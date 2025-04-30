@@ -1,0 +1,25 @@
+# Changelog
+
+All notable changes to this project will be documented in this file.
+
+## [1.1.1] - 2025-04-29
+### Fixed
+- Image storage using local storage instead of sync to avoid quota limits
+- Added image compression before storage
+
+## [1.1.0] - 2025-04-29
+### Added
+- Full management page (`manager.html`)
+- Image preview functionality
+- Direct link from popup to manager
+
+## [1.0.0] - 2025-04-29
+### Added
+- Initial release with core functionality:
+  - Domain blocking
+  - Custom image replacement
+  - Popup management UI
+
+## Format
+This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
+and follows the [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) format.

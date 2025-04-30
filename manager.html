@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Domain Blocker Manager</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .manager-container { width: 800px; margin: 20px auto; }
+    .domain-list { max-height: 400px; overflow-y: auto; }
+    .image-preview { max-width: 300px; margin-top: 20px; }
+  </style>
+</head>
+<body>
+  <div class="manager-container">
+    <h1>Domain Blocker Management</h1>
+    
+    <div class="block-list">
+      <h2>Blocked Domains</h2>
+      <div class="domain-list" id="domainList"></div>
+      
+      <div class="add-domain">
+        <input type="text" id="domainInput" placeholder="example.com">
+        <button id="addDomain">Add Domain</button>
+      </div>
+    </div>
+    
+    <div class="image-upload">
+      <h2>Custom Block Image</h2>
+      <input type="file" id="imageUpload" accept="image/*">
+      <div class="image-preview">
+        <img id="imagePreview" src="" alt="Current block image">
+      </div>
+    </div>
+  </div>
+  
+  <script src="manager.js"></script>
+</body>
+</html>

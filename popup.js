@@ -46,4 +46,9 @@ document.getElementById('imageUpload').addEventListener('change', (e) => {
   }
 });
 
+document.getElementById('openManager').addEventListener('click', (e) => {
+  e.preventDefault();
+  chrome.tabs.create({ url: chrome.runtime.getURL('manager.html') });
+});
+
 loadDomains();

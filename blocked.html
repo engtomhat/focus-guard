@@ -4,7 +4,18 @@
   <title>Domain Blocked</title>
   <style>
     body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
-    #blockedImage { max-width: 100%; max-height: 60vh; margin: 20px 0; }
+    #blockedImage { 
+      max-width: 100%; 
+      max-height: 60vh; 
+      margin: 20px 0;
+      border: 1px solid #eee;
+      border-radius: 4px;
+    }
+    .original-url {
+      color: #666;
+      font-size: 0.9em;
+      margin-top: 10px;
+    }
   </style>
 </head>
 <body>
@@ -12,6 +23,7 @@
   <div id="imageContainer">
     <img id="blockedImage" src="images/default-blocked.png" alt="Blocked">
   </div>
+  <p class="original-url">Blocked URL: <span id="originalUrl"></span></p>
   <p>To manage blocked domains, click the extension icon in your toolbar.</p>
   <script src="blocked.js"></script>
 </body>

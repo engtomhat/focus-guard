@@ -31,7 +31,7 @@ chrome.webNavigation.onBeforeNavigate.addListener((details) => {
   if (isDomainBlocked(url.hostname)) {
     console.log('Blocking domain:', url.hostname);
     chrome.tabs.update(details.tabId, {
-      url: chrome.runtime.getURL('blocked.html')
+      url: chrome.runtime.getURL(`blocked.html?url=${encodeURIComponent(details.url)}`)
     });
   }
 }, {url: [{hostContains: ""}]});
