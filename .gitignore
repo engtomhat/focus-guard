@@ -10,3 +10,7 @@ node_modules/
 
 # Ignore any locally generated files
 *.log
+
+# Built files
+*.zip
+*.tar.gz
