@@ -1,27 +1,51 @@
 # Domain Blocker Chrome Extension
 
-Blocks specified domains and shows a custom image instead.
+Blocks specified domains and shows a custom image instead. Version 1.2.0
 
 ## Features
-- Add/remove domains to block list
-- Customize the blocked page image
-- Supports subdomains (blocks www.reddit.com when reddit.com is blocked)
+
+✅ **Domain Management**
+- Add/remove domains via popup or manager
+- Persistent storage of blocked domains
+
+✅ **Custom Block Page**
+- Shows original blocked URL
+- Displays custom image (set in manager)
+- Falls back to default image
+
+✅ **Image Management**
+- Upload custom blocked image
+- Automatic compression and resizing
+- Preview before saving
+
+## Architecture
+
+```mermaid
+graph TD
+    A[Popup] -->|Quick Add/Remove| B(Domains)
+    C[Manager] -->|Full Control| B
+    C --> D(Images)
+    B --> E[Background]
+    D --> E
+    E -->|Blocks| F[Web Navigation]
+    F -->|Shows| G[Blocked Page]
+```
 
 ## Installation
+
 1. Clone this repository
-2. Open Chrome and go to `chrome://extensions`
+2. Go to `chrome://extensions`
 3. Enable "Developer mode"
-4. Click "Load unpacked" and select this directory
+4. Click "Load unpacked"
+5. Select the extension directory
 
 ## Usage
-1. Click the extension icon
-2. Add domains to block (e.g. "reddit.com")
-3. Upload a custom image (optional)
-4. Try navigating to a blocked domain
 
-## Development
-All source files are in the project root. Key files:
-- `background.js` - Core blocking logic
-- `content.js` - Page detection
-- `popup.*` - Management UI
-- `blocked.html` - Blocked page template
+- **Popup**: Quick domain management (click extension icon)
+- **Manager**: Full configuration (`Open Full Manager` link in popup)
+
+## Changelog
+See [CHANGELOG.md](CHANGELOG.md) for version history
+
+## License
+MIT
