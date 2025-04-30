@@ -1,0 +1,12 @@
+# Ignore OS files
+.DS_Store
+
+# Ignore editor files
+.vscode/
+.idea/
+
+# Ignore node modules (if added later)
+node_modules/
+
+# Ignore any locally generated files
+*.log
