@@ -37,8 +37,8 @@ function loadImage() {
 }
 
 // Add domain
-addDomainBtn.addEventListener('click', function() {
-  const domain = domainInput.value.trim();
+function addDomain() {
+  const domain = document.getElementById('domainInput').value.trim();
   
   if (domain) {
     chrome.storage.sync.get(['blockedDomains'], function(result) {
@@ -46,9 +46,18 @@ addDomainBtn.addEventListener('click', function() {
       if (!domains.includes(domain)) {
         domains.push(domain);
         chrome.storage.sync.set({ blockedDomains: domains }, loadDomains);
-        domainInput.value = '';
+        document.getElementById('domainInput').value = '';
       }
     });
+  }
+}
+
+addDomainBtn.addEventListener('click', addDomain);
+
+// Add Enter key support
+document.getElementById('domainInput').addEventListener('keypress', function(e) {
+  if (e.key === 'Enter') {
+    addDomain();
   }
 });
 

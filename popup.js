@@ -20,19 +20,26 @@ function loadDomains() {
 }
 
 // Add new domain
-document.getElementById('addDomain').addEventListener('click', function() {
-  const domainInput = document.getElementById('domainInput');
-  const domain = domainInput.value.trim();
-  
+function addDomain() {
+  const domain = document.getElementById('domainInput').value.trim();
   if (domain) {
     chrome.storage.sync.get(['blockedDomains'], function(result) {
       const domains = result.blockedDomains || [];
       if (!domains.includes(domain)) {
         domains.push(domain);
         chrome.storage.sync.set({ blockedDomains: domains }, loadDomains);
-        domainInput.value = '';
+        document.getElementById('domainInput').value = '';
       }
     });
+  }
+}
+
+document.getElementById('addDomain').addEventListener('click', addDomain);
+
+// Add Enter key support
+document.getElementById('domainInput').addEventListener('keypress', function(e) {
+  if (e.key === 'Enter') {
+    addDomain();
   }
 });
 

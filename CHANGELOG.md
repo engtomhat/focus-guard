@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.3.1] - 2025-05-01
+### Added
+- Enter key support for adding domains in popup/manager
+
 ## [1.3.0] - 2025-05-01
 ### Changed
 - Rebranded to "Focus Guard"
