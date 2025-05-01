@@ -1,123 +1,98 @@
-// Load and display blocked domains
+// Focus Guard Manager Script
+// Handles the full management interface
+
+// DOM elements
+const domainInput = document.getElementById('domainInput');
+const addDomainBtn = document.getElementById('addDomain');
+const domainList = document.getElementById('domainList');
+const imageUpload = document.getElementById('imageUpload');
+const imagePreview = document.getElementById('imagePreview');
+
+// Load domains
 function loadDomains() {
   chrome.storage.sync.get(['blockedDomains'], function(result) {
-    const domainList = document.getElementById('domainList');
     domainList.innerHTML = '';
     
-    if (result.blockedDomains) {
+    if (result.blockedDomains && result.blockedDomains.length > 0) {
       result.blockedDomains.forEach(domain => {
-        const div = document.createElement('div');
-        div.className = 'domain-item';
-        div.innerHTML = `
+        const domainItem = document.createElement('div');
+        domainItem.className = 'domain-item';
+        domainItem.innerHTML = `
           <span>${domain}</span>
-          <button class="remove-btn" data-domain="${domain}" title="Remove domain">-</button>
+          <button class="remove-domain" data-domain="${domain}">-</button>
         `;
-        domainList.appendChild(div);
+        domainList.appendChild(domainItem);
       });
     }
-    
-    // Add event listeners to remove buttons
-    document.querySelectorAll('.remove-btn').forEach(btn => {
-      btn.addEventListener('click', function() {
-        const domain = this.getAttribute('data-domain');
-        removeDomain(domain);
-      });
-    });
   });
 }
 
-// Add new domain
-document.getElementById('addDomain').addEventListener('click', () => {
-  const domain = document.getElementById('domainInput').value.trim();
+// Load current image
+function loadImage() {
+  chrome.storage.local.get(['blockedImage'], function(result) {
+    if (result.blockedImage) {
+      imagePreview.src = result.blockedImage;
+    }
+  });
+}
+
+// Add domain
+addDomainBtn.addEventListener('click', function() {
+  const domain = domainInput.value.trim();
+  
   if (domain) {
     chrome.storage.sync.get(['blockedDomains'], function(result) {
       const domains = result.blockedDomains || [];
       if (!domains.includes(domain)) {
         domains.push(domain);
         chrome.storage.sync.set({ blockedDomains: domains }, loadDomains);
-        document.getElementById('domainInput').value = '';
+        domainInput.value = '';
       }
     });
   }
 });
 
 // Remove domain
-function removeDomain(domain) {
-  chrome.storage.sync.get(['blockedDomains'], function(result) {
-    const domains = (result.blockedDomains || []).filter(d => d !== domain);
-    chrome.storage.sync.set({ blockedDomains: domains }, loadDomains);
-  });
-}
+domainList.addEventListener('click', function(e) {
+  if (e.target.classList.contains('remove-domain')) {
+    const domain = e.target.getAttribute('data-domain');
+    chrome.storage.sync.get(['blockedDomains'], function(result) {
+      const domains = result.blockedDomains.filter(d => d !== domain);
+      chrome.storage.sync.set({ blockedDomains: domains }, loadDomains);
+    });
+  }
+});
 
-// Basic image compression
-function compressImage(file) {
-  return new Promise((resolve) => {
-    const img = new Image();
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
-    
-    img.onload = () => {
-      // Set canvas dimensions (max 800px width/height)
-      const maxSize = 800;
-      let width = img.width;
-      let height = img.height;
-      
-      if (width > height && width > maxSize) {
-        height *= maxSize / width;
-        width = maxSize;
-      } else if (height > maxSize) {
-        width *= maxSize / height;
-        height = maxSize;
-      }
-      
-      canvas.width = width;
-      canvas.height = height;
-      
-      // Draw and compress
-      ctx.drawImage(img, 0, 0, width, height);
-      canvas.toBlob(
-        (blob) => resolve(blob || file), 
-        'image/jpeg', 
-        0.7 // Quality
-      );
-    };
-    
-    img.src = URL.createObjectURL(file);
-  });
-}
-
-// Image upload with compression
-document.getElementById('imageUpload').addEventListener('change', async (e) => {
+// Handle image upload
+imageUpload.addEventListener('change', function(e) {
   const file = e.target.files[0];
-  console.log('Selected file:', file);
-  
   if (file) {
-    try {
-      // Compress image
-      const compressedImage = await compressImage(file);
-      console.log('Compressed image size:', compressedImage.size);
-      
-      // Store in local storage
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        chrome.storage.local.set({ blockedImage: event.target.result }, () => {
-          console.log('Image saved to local storage');
-          document.getElementById('imagePreview').src = event.target.result;
-        });
-      };
-      reader.readAsDataURL(compressedImage);
-    } catch (error) {
-      console.error('Image processing error:', error);
-    }
+    const reader = new FileReader();
+    reader.onload = function(event) {
+      // Compress image before storing
+      compressImage(event.target.result, 0.7, function(compressed) {
+        imagePreview.src = compressed;
+        chrome.storage.local.set({ blockedImage: compressed });
+      });
+    };
+    reader.readAsDataURL(file);
   }
 });
 
-// Load current image
-chrome.storage.local.get(['blockedImage'], function(result) {
-  if (result.blockedImage) {
-    document.getElementById('imagePreview').src = result.blockedImage;
-  }
-});
+// Simple image compression
+function compressImage(dataUrl, quality, callback) {
+  const img = new Image();
+  img.src = dataUrl;
+  img.onload = function() {
+    const canvas = document.createElement('canvas');
+    canvas.width = img.width;
+    canvas.height = img.height;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(img, 0, 0);
+    callback(canvas.toDataURL('image/jpeg', quality));
+  };
+}
 
-// Initial load
+// Initialize
 loadDomains();
+loadImage();

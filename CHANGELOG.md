@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.3.0] - 2025-05-01
+### Changed
+- Rebranded to "Focus Guard"
+- Updated all UI messaging to focus on productivity protection
+- Improved blocked page design
+- Standardized manager interface
+
 ## [1.2.2] - 2025-04-29
 ### Added
 - New centered logo in README

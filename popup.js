@@ -9,27 +9,27 @@ function loadDomains() {
         const li = document.createElement('li');
         li.innerHTML = `
           <span>${domain}</span>
-          <button class="remove-domain" data-domain="${domain}" title="Remove domain">-</button>
+          <button class="remove-btn" data-domain="${domain}">-</button>
         `;
         domainList.appendChild(li);
       });
     } else {
-      domainList.innerHTML = '<li>No domains blocked</li>';
+      domainList.innerHTML = '<li class="empty">No distractions blocked yet</li>';
     }
   });
 }
 
 // Add new domain
-document.getElementById('addDomain').addEventListener('click', () => {
+document.getElementById('addDomain').addEventListener('click', function() {
   const domainInput = document.getElementById('domainInput');
   const domain = domainInput.value.trim();
   
   if (domain) {
     chrome.storage.sync.get(['blockedDomains'], function(result) {
-      const blockedDomains = result.blockedDomains || [];
-      if (!blockedDomains.includes(domain)) {
-        blockedDomains.push(domain);
-        chrome.storage.sync.set({ blockedDomains }, loadDomains);
+      const domains = result.blockedDomains || [];
+      if (!domains.includes(domain)) {
+        domains.push(domain);
+        chrome.storage.sync.set({ blockedDomains: domains }, loadDomains);
         domainInput.value = '';
       }
     });
@@ -37,20 +37,20 @@ document.getElementById('addDomain').addEventListener('click', () => {
 });
 
 // Remove domain
-document.addEventListener('click', (e) => {
-  if (e.target.classList.contains('remove-domain')) {
-    const domainToRemove = e.target.dataset.domain;
+document.addEventListener('click', function(e) {
+  if (e.target.classList.contains('remove-btn')) {
+    const domain = e.target.getAttribute('data-domain');
     chrome.storage.sync.get(['blockedDomains'], function(result) {
-      const blockedDomains = (result.blockedDomains || []).filter(d => d !== domainToRemove);
-      chrome.storage.sync.set({ blockedDomains }, loadDomains);
+      const domains = result.blockedDomains.filter(d => d !== domain);
+      chrome.storage.sync.set({ blockedDomains: domains }, loadDomains);
     });
   }
 });
 
-// Open manager page
-document.getElementById('openManager').addEventListener('click', () => {
-  chrome.tabs.create({ url: chrome.runtime.getURL('manager.html') });
+// Open manager
+document.getElementById('openManager').addEventListener('click', function() {
+  chrome.tabs.create({ url: 'manager.html' });
 });
 
-// Initial load
+// Initialize
 loadDomains();

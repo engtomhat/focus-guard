@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "Domain Blocker",
-  "version": "1.2.2",
-  "description": "Blocks domains and shows a custom image instead",
+  "name": "Focus Guard",
+  "version": "1.3.0",
+  "description": "Protects your focus by intercepting distracting websites",
   "permissions": ["storage", "webNavigation"],
   "background": {
     "service_worker": "background.js"

@@ -1,22 +1,22 @@
-// Load custom blocked image
-chrome.storage.local.get(['blockedImage'], function(result) {
-  console.log('Blocked page - retrieved from storage:', 
-    result.blockedImage ? 'Image exists' : 'No custom image');
-    
+// Focus Guard Blocked Page Script
+// Shows when a blocked site is accessed
+
+document.addEventListener('DOMContentLoaded', function() {
+  const originalUrl = document.getElementById('originalUrl');
   const blockedImage = document.getElementById('blockedImage');
   
-  if (result.blockedImage) {
-    console.log('Setting custom image');
-    blockedImage.src = result.blockedImage;
-  } else {
-    console.log('Using default image');
-    blockedImage.src = chrome.runtime.getURL('images/default-blocked.png');
+  // Get URL from query parameters
+  const urlParams = new URLSearchParams(window.location.search);
+  const url = urlParams.get('url');
+  
+  if (url) {
+    originalUrl.textContent = url;
   }
+  
+  // Load custom image if set
+  chrome.storage.local.get(['blockedImage'], function(result) {
+    if (result.blockedImage) {
+      blockedImage.src = result.blockedImage;
+    }
+  });
 });
-
-// Show the original URL that was blocked
-const urlParams = new URLSearchParams(window.location.search);
-const originalUrl = urlParams.get('url');
-if (originalUrl) {
-  document.getElementById('originalUrl').textContent = originalUrl;
-}

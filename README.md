@@ -1,6 +1,7 @@
 <div align="center">
-  <img src="images/icon128.png" width="128" alt="Domain Blocker Logo">
-  <h1>Domain Blocker Chrome Extension</h1>
+  <img src="images/icon128.png" width="128" alt="Focus Guard Logo">
+  <h1>Focus Guard</h1>
+  <p>Browser extension that protects your focus by intercepting distracting websites</p>
 </div>
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
@@ -37,7 +38,7 @@ graph TD
 ## Installation
 
 1. Clone this repository
-2. Go to `chrome://extensions`
+2. Go to `chrome://extensions` or `edge://extensions`
 3. Enable "Developer mode"
 4. Click "Load unpacked"
 5. Select the extension directory

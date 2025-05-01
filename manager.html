@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Domain Blocker Manager</title>
+  <title>Focus Guard Manager</title>
   <link rel="stylesheet" href="styles.css">
   <style>
     .manager-container { width: 800px; margin: 20px auto; }
@@ -11,23 +11,22 @@
 </head>
 <body>
   <div class="manager-container">
-    <h1>Domain Blocker Management</h1>
+    <h1>Focus Guard Manager</h1>
     
-    <div class="block-list">
+    <div class="domain-section">
       <h2>Blocked Domains</h2>
-      <div class="domain-list" id="domainList"></div>
-      
       <div class="add-domain">
         <input type="text" id="domainInput" placeholder="example.com">
-        <button id="addDomain">Add Domain</button>
+        <button id="addDomain">Add</button>
       </div>
+      <div class="domain-list" id="domainList"></div>
     </div>
     
-    <div class="image-upload">
-      <h2>Custom Block Image</h2>
+    <div class="image-section">
+      <h2>Focus Reminder Image</h2>
       <input type="file" id="imageUpload" accept="image/*">
       <div class="image-preview">
-        <img id="imagePreview" src="" alt="Current block image">
+        <img src="images/default-blocked.png" alt="Default focus reminder" id="imagePreview">
       </div>
     </div>
   </div>

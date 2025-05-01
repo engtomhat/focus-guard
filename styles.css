@@ -1,8 +1,18 @@
 .container { width: 300px; padding: 15px; font-family: Arial, sans-serif; }
+.manager-container { width: 800px; margin: 20px auto; }
 h1, h2 { color: #333; }
-.block-list { margin-bottom: 15px; }
-#domainList { list-style: none; padding: 0; }
-#domainList li { padding: 5px 0; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
+.domain-section { margin-bottom: 20px; }
+.domain-list { 
+  max-height: 400px; 
+  overflow-y: auto;
+}
+.domain-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 5px 0;
+  border-bottom: 1px solid #eee;
+}
 .add-domain { display: flex; margin-top: 10px; }
 #domainInput { flex-grow: 1; padding: 5px; margin-right: 5px; }
 button { padding: 5px 10px; background: #4CAF50; color: white; border: none; border-radius: 3px; cursor: pointer; }
@@ -23,37 +33,7 @@ button:hover { background: #45a049; }
 .manager-link a { color: #2196F3; text-decoration: none; }
 .manager-link a:hover { text-decoration: underline; }
 
-/* Manager page specific styles */
-.manager-container { width: 800px; margin: 20px auto; }
-.domain-list { 
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 10px;
-  max-height: 400px; 
-  overflow-y: auto;
-}
-.domain-item {
-  display: contents;
-}
-.domain-item span {
-  align-self: center;
-}
-.domain-item button {
-  background: #f44336 !important;
-  width: 22px;
-  height: 22px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 14px;
-  font-weight: bold;
-  padding: 0;
-}
-.domain-item button:hover {
-  background: #d32f2f !important;
-}
-
-/* Image preview constraints */
+.image-section { margin-top: 30px; }
 .image-preview {
   max-width: 100%;
   width: 300px;
@@ -66,4 +46,43 @@ button:hover { background: #45a049; }
   max-width: 100%;
   height: auto;
   display: block;
+}
+
+/* Popup specific styles */
+#domainList {
+  list-style: none;
+  padding: 0;
+  margin: 10px 0;
+}
+#domainList li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 5px 0;
+  border-bottom: 1px solid #eee;
+}
+
+/* Blocked page styles */
+.blocked-container {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 20px;
+  text-align: center;
+}
+.blocked-image {
+  max-width: 100%;
+  width: 500px;
+  margin: 20px auto;
+}
+.blocked-image img {
+  max-width: 100%;
+  height: auto;
+  border: 1px solid #eee;
+  border-radius: 4px;
+}
+.blocked-url-display {
+  color: #666;
+  font-size: 0.9em;
+  margin: 10px 0;
+  word-break: break-all;
 }
