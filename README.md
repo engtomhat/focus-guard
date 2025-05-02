@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="images/icon128.png" width="128" alt="Focus Guard Logo">
+  <img src="chrome/images/icon128.png" width="128" alt="Focus Guard Logo">
   <h1>Focus Guard</h1>
   <p>Browser extension that protects your focus by intercepting distracting websites</p>
 </div>
