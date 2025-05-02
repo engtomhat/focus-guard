@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.4.0] - 2025-05-02
+### Added
+- Firefox extension support
+- Cross-browser API compatibility layer
+
 ## [1.3.1] - 2025-05-01
 ### Added
 - Enter key support for adding domains in popup/manager

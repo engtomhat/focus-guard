@@ -22,6 +22,9 @@
 - Automatic compression and resizing
 - Preview before saving
 
+✅ **Cross-Browser Support**
+- Blocks distracting websites across multiple browsers
+
 ## Architecture
 
 ```mermaid
@@ -37,11 +40,19 @@ graph TD
 
 ## Installation
 
+### Chrome
 1. Clone this repository
-2. Go to `chrome://extensions` or `edge://extensions`
+2. Go to `chrome://extensions`
 3. Enable "Developer mode"
 4. Click "Load unpacked"
-5. Select the extension directory
+5. Select the `chrome` directory
+
+### Firefox
+1. Clone this repository
+2. Go to `about:debugging`
+3. Click "This Firefox"
+4. Click "Load Temporary Add-on"
+5. Select any file in the `firefox` directory
 
 ## Usage
 
