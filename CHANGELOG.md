@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.4.1] - 2025-05-02
+### Security
+- Replaced all unsafe `innerHTML` assignments with secure DOM manipulation methods
+- Implemented consistent cross-browser element creation patterns
+- Added null checks for storage operations
+
+### Changed
+- Version bump to reflect security improvements
+
 ## [1.4.0] - 2025-05-02
 ### Added
 - Firefox extension support
