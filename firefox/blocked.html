@@ -5,20 +5,21 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <div class="blocked-container">
-    <h1>Focus Protected</h1>
-    <p>The site has been blocked by Focus Guard.</p>
+  <div class="blocked-container blocked-page">
+    <h1 class="blocked-title">Focus Protected</h1>
+    <p class="blocked-message">This site has been blocked to help you stay focused.</p>
     
     <div class="blocked-image">
       <img id="blockedImage" src="images/default-blocked.png" alt="Focus reminder">
     </div>
     
-    <p class="blocked-url-display">
+    <div class="blocked-url-display">
       Blocked URL: <span id="originalUrl"></span>
-    </p>
+    </div>
     
     <p>This interruption helps maintain your productivity flow.</p>
-    <p>To manage blocked sites, click the extension icon in your toolbar.</p>
+    
+    <p class="blocked-footer">To manage blocked sites, click the Focus Guard icon in your toolbar.</p>
   </div>
   <script src="blocked.js"></script>
 </body>

@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.4.2] - 2025-05-02
+### Changed
+- Improved UI styling and layout consistency across all pages
+- Enhanced text alignment and container widths for better readability
+
 ## [1.4.1] - 2025-05-02
 ### Security
 - Replaced all unsafe `innerHTML` assignments with secure DOM manipulation methods
