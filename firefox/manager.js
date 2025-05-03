@@ -11,18 +11,30 @@ const imagePreview = document.getElementById('imagePreview');
 // Load domains
 function loadDomains() {
   browser.storage.sync.get(['blockedDomains'], function(result) {
-    domainList.innerHTML = '';
+    const domainList = document.getElementById('domainList');
+    while (domainList.firstChild) {
+      domainList.removeChild(domainList.firstChild);
+    }
     
-    if (result.blockedDomains && result.blockedDomains.length > 0) {
+    if (result.blockedDomains?.length > 0) {
       result.blockedDomains.forEach(domain => {
-        const domainItem = document.createElement('div');
-        domainItem.className = 'domain-item';
-        domainItem.innerHTML = `
-          <span>${domain}</span>
-          <button class="remove-domain" data-domain="${domain}">-</button>
-        `;
-        domainList.appendChild(domainItem);
+        const li = document.createElement('li');
+        const span = document.createElement('span');
+        span.textContent = domain;
+        
+        const button = document.createElement('button');
+        button.className = 'remove-btn';
+        button.textContent = '-';
+        button.dataset.domain = domain;
+        
+        li.append(span, button);
+        domainList.appendChild(li);
       });
+    } else {
+      const li = document.createElement('li');
+      li.className = 'empty';
+      li.textContent = 'No domains blocked';
+      domainList.appendChild(li);
     }
   });
 }

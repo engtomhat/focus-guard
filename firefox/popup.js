@@ -4,17 +4,31 @@ function loadDomains() {
     const domainList = document.getElementById('domainList');
     domainList.innerHTML = '';
     
+    // Clear existing safely
+    while (domainList.firstChild) {
+      domainList.removeChild(domainList.firstChild);
+    }
+    
     if (result.blockedDomains && result.blockedDomains.length > 0) {
       result.blockedDomains.forEach(domain => {
         const li = document.createElement('li');
-        li.innerHTML = `
-          <span>${domain}</span>
-          <button class="remove-btn" data-domain="${domain}">-</button>
-        `;
+        
+        const span = document.createElement('span');
+        span.textContent = domain;
+        
+        const button = document.createElement('button');
+        button.className = 'remove-btn';
+        button.textContent = '-';
+        button.dataset.domain = domain;
+        
+        li.append(span, button);
         domainList.appendChild(li);
       });
     } else {
-      domainList.innerHTML = '<li class="empty">No distractions blocked yet</li>';
+      const li = document.createElement('li');
+      li.className = 'empty';
+      li.textContent = 'No distractions blocked yet';
+      domainList.appendChild(li);
     }
   });
 }
