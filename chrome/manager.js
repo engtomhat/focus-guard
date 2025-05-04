@@ -1,12 +1,16 @@
 // Focus Guard Manager Script
 // Handles the full management interface
 
+// Default image path
+const DEFAULT_IMAGE_PATH = "images/default-blocked.png"
+
 // DOM elements
 const domainInput = document.getElementById("domainInput")
 const addDomainBtn = document.getElementById("addDomain")
 const domainList = document.getElementById("domainList")
 const imageUpload = document.getElementById("imageUpload")
 const imagePreview = document.getElementById("imagePreview")
+const resetImageBtn = document.getElementById("resetImage")
 
 // Check if chrome is defined, if not, mock it for development/testing
 if (typeof chrome === "undefined") {
@@ -42,6 +46,13 @@ if (typeof chrome === "undefined") {
           // Mock implementation for setting data in local storage
           if (items.blockedImage) {
             localStorage.setItem("blockedImage", items.blockedImage)
+          }
+          callback()
+        },
+        remove: (keys, callback) => {
+          // Mock implementation for removing data from local storage
+          if (keys.includes("blockedImage")) {
+            localStorage.removeItem("blockedImage")
           }
           callback()
         },
@@ -87,6 +98,8 @@ function loadImage() {
   chrome.storage.local.get(["blockedImage"], (result) => {
     if (result.blockedImage) {
       imagePreview.src = result.blockedImage
+    } else {
+      imagePreview.src = DEFAULT_IMAGE_PATH
     }
   })
 }
@@ -149,6 +162,15 @@ imageUpload.addEventListener("change", (e) => {
     }
     reader.readAsDataURL(file)
   }
+})
+
+// Reset image to default
+resetImageBtn.addEventListener("click", () => {
+  imagePreview.src = DEFAULT_IMAGE_PATH
+  chrome.storage.local.remove(["blockedImage"], () => {
+    // Optional: Show feedback that image was reset
+    console.log("Image reset to default")
+  })
 })
 
 // Simple image compression

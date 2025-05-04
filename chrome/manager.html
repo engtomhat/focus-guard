@@ -27,9 +27,15 @@
       <p>This image will be displayed when you try to access a blocked site.</p>
       
       <div class="image-upload-container">
-        <label for="imageUpload" class="image-upload-label">
-          Upload Custom Image
-        </label>
+        <div class="image-actions">
+          <label for="imageUpload" class="image-upload-label primary-action">
+            Upload Custom Image
+          </label>
+          <label id="resetImage" class="image-upload-label secondary-action">
+            Reset to Default
+          </label>
+        </div>
+        
         <input type="file" id="imageUpload" accept="image/*">
         
         <div class="image-preview">

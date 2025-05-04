@@ -4,12 +4,16 @@
 // Declare browser
 const browser = window.browser || window.chrome
 
+// Default image path
+const DEFAULT_IMAGE_PATH = "images/default-blocked.png"
+
 // DOM elements
 const domainInput = document.getElementById("domainInput")
 const addDomainBtn = document.getElementById("addDomain")
 const domainList = document.getElementById("domainList")
 const imageUpload = document.getElementById("imageUpload")
 const imagePreview = document.getElementById("imagePreview")
+const resetImageBtn = document.getElementById("resetImage")
 
 // Load domains
 function loadDomains() {
@@ -48,6 +52,8 @@ function loadImage() {
   browser.storage.local.get(["blockedImage"], (result) => {
     if (result.blockedImage) {
       imagePreview.src = result.blockedImage
+    } else {
+      imagePreview.src = DEFAULT_IMAGE_PATH
     }
   })
 }
@@ -110,6 +116,15 @@ imageUpload.addEventListener("change", (e) => {
     }
     reader.readAsDataURL(file)
   }
+})
+
+// Reset image to default
+resetImageBtn.addEventListener("click", () => {
+  imagePreview.src = DEFAULT_IMAGE_PATH
+  browser.storage.local.remove(["blockedImage"], () => {
+    // Optional: Show feedback that image was reset
+    console.log("Image reset to default")
+  })
 })
 
 // Simple image compression

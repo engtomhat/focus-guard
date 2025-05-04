@@ -265,21 +265,54 @@ button:active {
   gap: 16px;
 }
 
+.image-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
 .image-upload-label {
   display: inline-block;
   padding: 10px 16px;
-  background: var(--primary);
-  color: white;
   border-radius: 6px;
   cursor: pointer;
   font-weight: 500;
   transition: background-color 0.2s;
   text-align: center;
-  max-width: 200px;
+  min-width: 160px;
 }
 
-.image-upload-label:hover {
+.image-upload-label.primary-action {
+  background: var(--primary);
+  color: white;
+}
+
+.image-upload-label.primary-action:hover {
   background: var(--primary-hover);
+}
+
+.image-upload-label.secondary-action {
+  background: transparent;
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+
+.image-upload-label.secondary-action:hover {
+  background: var(--background-alt);
+}
+
+.reset-image-btn {
+  background: transparent;
+  color: var(--text);
+  border: 1px solid var(--border);
+  min-width: 160px;
+  font-weight: 500;
+  padding: 10px 16px;
+}
+
+.reset-image-btn:hover {
+  background: var(--background-alt);
 }
 
 #imageUpload {
