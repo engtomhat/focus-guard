@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "Focus Guard",
-  "version": "1.4.2",
+  "version": "1.5.0",
   "description": "Protects your focus by intercepting distracting websites",
   "browser_specific_settings": {
     "gecko": {
@@ -21,15 +21,13 @@
   "browser_action": {
     "default_popup": "popup.html",
     "default_icon": {
-      "16": "images/icon16.png",
-      "48": "images/icon48.png",
-      "128": "images/icon128.png"
+      "32": "images/icon32.png",
+      "64": "images/icon64.png"
     }
   },
   "icons": {
-    "16": "images/icon16.png",
-    "48": "images/icon48.png",
-    "128": "images/icon128.png"
+    "32": "images/icon32.png",
+    "64": "images/icon64.png"
   },
   "web_accessible_resources": [
     "blocked.html",

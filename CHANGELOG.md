@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.5.0] - 2025-05-04
+### Added
+- New image reset functionality in manager
+- Better default image handling
+- Improved blocked page messaging
+
+### Changed
+- Updated UI for image upload section with primary/secondary actions
+- More consistent styling between Chrome and Firefox versions
+
 ## [1.4.2] - 2025-05-02
 ### Changed
 - Improved UI styling and layout consistency across all pages
