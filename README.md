@@ -41,6 +41,11 @@ graph TD
 ## Installation
 
 ### Chrome
+#### Web Store
+1. Go to [Chrome Web Store](https://chromewebstore.google.com/detail/ppioeifofhgpmcbdpehndajepecngmgp)
+2. Click "Add to Chrome"
+
+#### Local
 1. Clone this repository
 2. Go to `chrome://extensions`
 3. Enable "Developer mode"
@@ -48,6 +53,11 @@ graph TD
 5. Select the `chrome` directory
 
 ### Firefox
+#### Firefox Add-ons
+1. Go to [Firefox Add-ons](https://addons.mozilla.org/en-US/firefox/addon/focus-guard-pro/)
+2. Click "Add to Firefox"
+
+#### Local
 1. Clone this repository
 2. Go to `about:debugging`
 3. Click "This Firefox"
