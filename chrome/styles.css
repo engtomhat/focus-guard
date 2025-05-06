@@ -367,3 +367,10 @@ button:active {
   color: var(--text-light);
   text-align: center;
 }
+
+/* Buy Me a Coffee widget styles */
+.bmc-container {
+  margin: 32px auto 0;
+  text-align: center;
+  padding: 16px 0;
+}

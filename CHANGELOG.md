@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.5.1] - 2025-05-06
+### Changed
+- Added a (Buy me a coffee) button to manager and blocked pages
+
 ## [1.5.0] - 2025-05-04
 ### Added
 - New image reset functionality in manager
