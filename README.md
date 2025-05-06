@@ -76,5 +76,13 @@ graph TD
 ## Changelog
 See [CHANGELOG.md](CHANGELOG.md) for version history
 
+## Support This Project
+
+If Focus Guard helps you stay productive, consider supporting its development:
+
+[![Buy Me A Coffee](bmc-logo.png)](https://www.buymeacoffee.com/tomhat)
+
+Your support helps maintain and improve this extension!
+
 ## License
 GNU General Public License v3.0 - See [LICENSE](LICENSE) for full text
