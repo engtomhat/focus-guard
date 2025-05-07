@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Focus Guard",
-  "version": "1.5.1",
+  "version": "1.5.2",
   "description": "Protects your focus by intercepting distracting websites",
   "permissions": ["storage", "webNavigation"],
   "background": {
