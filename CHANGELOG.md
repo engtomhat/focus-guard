@@ -1,7 +1,7 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
-## [1.5.2] - 2025-05-07
+## [1.5.3] - 2025-05-07
 ### Changed
 - Added privacy disclaimer to README
 - Improved tracking request handling
