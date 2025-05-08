@@ -1,6 +1,3 @@
-// Focus Guard Manager Script
-// Handles the full management interface
-
 // Default image path
 const DEFAULT_IMAGE_PATH = "images/default-blocked.png"
 
@@ -11,6 +8,10 @@ const domainList = document.getElementById("domainList")
 const imageUpload = document.getElementById("imageUpload")
 const imagePreview = document.getElementById("imagePreview")
 const resetImageBtn = document.getElementById("resetImage")
+const profileSelector = document.getElementById("profileSelector")
+const profileNameInput = document.getElementById("profileNameInput")
+const addProfileBtn = document.getElementById("addProfile")
+const deleteProfileBtn = document.getElementById("deleteProfile")
 
 // Check if chrome is defined, if not, mock it for development/testing
 if (typeof chrome === "undefined") {
@@ -20,6 +21,12 @@ if (typeof chrome === "undefined") {
         get: (keys, callback) => {
           // Mock implementation for getting data from storage
           const result = {}
+          if (keys.includes("profiles")) {
+            result.profiles = JSON.parse(localStorage.getItem("profiles") || "{}")
+          }
+          if (keys.includes("activeProfile")) {
+            result.activeProfile = localStorage.getItem("activeProfile") || "default"
+          }
           if (keys.includes("blockedDomains")) {
             result.blockedDomains = JSON.parse(localStorage.getItem("blockedDomains") || "[]")
           }
@@ -27,8 +34,11 @@ if (typeof chrome === "undefined") {
         },
         set: (items, callback) => {
           // Mock implementation for setting data in storage
-          if (items.blockedDomains) {
-            localStorage.setItem("blockedDomains", JSON.stringify(items.blockedDomains))
+          if (items.profiles) {
+            localStorage.setItem("profiles", JSON.stringify(items.profiles))
+          }
+          if (items.activeProfile) {
+            localStorage.setItem("activeProfile", items.activeProfile)
           }
           callback()
         },
@@ -61,36 +71,91 @@ if (typeof chrome === "undefined") {
   }
 }
 
-// Load domains
-function loadDomains() {
-  chrome.storage.sync.get(["blockedDomains"], (result) => {
-    const domainList = document.getElementById("domainList")
-    while (domainList.firstChild) {
-      domainList.removeChild(domainList.firstChild)
-    }
+// Load profiles and populate selector
+function loadProfiles() {
+  chrome.storage.sync.get(["profiles", "activeProfile"], (result) => {
+    // If no profiles exist yet, create a default one
+    if (!result.profiles) {
+      chrome.storage.sync.get(["blockedDomains"], (oldData) => {
+        // Migrate old data structure to new profile-based structure
+        const defaultDomains = oldData.blockedDomains || []
 
-    if (result.blockedDomains?.length > 0) {
-      result.blockedDomains.forEach((domain) => {
-        const li = document.createElement("li")
-        const span = document.createElement("span")
-        span.textContent = domain
+        const profiles = {
+          default: {
+            name: "Default",
+            domains: defaultDomains,
+          },
+        }
 
-        const button = document.createElement("button")
-        button.className = "remove-btn"
-        button.textContent = "-"
-        button.dataset.domain = domain
-        button.setAttribute("aria-label", `Remove ${domain}`)
-
-        li.append(span, button)
-        domainList.appendChild(li)
+        // Save the new structure
+        chrome.storage.sync.set(
+          {
+            profiles: profiles,
+            activeProfile: "default",
+          },
+          () => {
+            // Reload after migration
+            loadProfiles()
+          },
+        )
       })
-    } else {
-      const li = document.createElement("li")
-      li.className = "empty"
-      li.textContent = "No domains blocked"
-      domainList.appendChild(li)
+      return
     }
+
+    const profiles = result.profiles
+    const activeProfile = result.activeProfile || "default"
+
+    // Clear existing options
+    profileSelector.innerHTML = ""
+
+    // Populate profile selector
+    Object.keys(profiles).forEach((profileId) => {
+      const option = document.createElement("option")
+      option.value = profileId
+      option.textContent = profiles[profileId].name
+
+      if (profileId === activeProfile) {
+        option.selected = true
+      }
+
+      profileSelector.appendChild(option)
+    })
+
+    // Load domains for selected profile
+    loadDomains(profiles[activeProfile].domains)
+
+    // Update delete button state
+    updateDeleteButtonState(Object.keys(profiles).length)
   })
+}
+
+// Load domains for the selected profile
+function loadDomains(domains) {
+  while (domainList.firstChild) {
+    domainList.removeChild(domainList.firstChild)
+  }
+
+  if (domains?.length > 0) {
+    domains.forEach((domain) => {
+      const li = document.createElement("li")
+      const span = document.createElement("span")
+      span.textContent = domain
+
+      const button = document.createElement("button")
+      button.className = "remove-btn"
+      button.textContent = "-"
+      button.dataset.domain = domain
+      button.setAttribute("aria-label", `Remove ${domain}`)
+
+      li.append(span, button)
+      domainList.appendChild(li)
+    })
+  } else {
+    const li = document.createElement("li")
+    li.className = "empty"
+    li.textContent = "No domains blocked"
+    domainList.appendChild(li)
+  }
 }
 
 // Load current image
@@ -104,18 +169,20 @@ function loadImage() {
   })
 }
 
-// Add domain
+// Add domain to current profile
 function addDomain() {
-  const domain = document.getElementById("domainInput").value.trim()
+  const domain = domainInput.value.trim()
+  const selectedProfile = profileSelector.value
 
   if (domain) {
-    chrome.storage.sync.get(["blockedDomains"], (result) => {
-      const domains = result.blockedDomains || []
-      if (!domains.includes(domain)) {
-        domains.push(domain)
-        chrome.storage.sync.set({ blockedDomains: domains }, () => {
-          loadDomains()
-          // Show feedback
+    chrome.storage.sync.get(["profiles"], (result) => {
+      const profiles = result.profiles
+
+      if (!profiles[selectedProfile].domains.includes(domain)) {
+        profiles[selectedProfile].domains.push(domain)
+
+        chrome.storage.sync.set({ profiles: profiles }, () => {
+          loadDomains(profiles[selectedProfile].domains)
           domainInput.value = ""
           domainInput.focus()
         })
@@ -128,25 +195,142 @@ function addDomain() {
   }
 }
 
+// Remove domain from current profile
+function removeDomain(domain) {
+  const selectedProfile = profileSelector.value
+
+  chrome.storage.sync.get(["profiles"], (result) => {
+    const profiles = result.profiles
+
+    profiles[selectedProfile].domains = profiles[selectedProfile].domains.filter((d) => d !== domain)
+
+    chrome.storage.sync.set({ profiles: profiles }, () => {
+      loadDomains(profiles[selectedProfile].domains)
+    })
+  })
+}
+
+// Add new profile
+function addProfile() {
+  const profileName = profileNameInput.value.trim()
+
+  if (profileName) {
+    chrome.storage.sync.get(["profiles"], (result) => {
+      const profiles = result.profiles || {}
+
+      // Generate a unique ID for the profile
+      const profileId = "profile_" + Date.now()
+
+      // Add new profile
+      profiles[profileId] = {
+        name: profileName,
+        domains: [],
+      }
+
+      // Save updated profiles
+      chrome.storage.sync.set({ profiles: profiles }, () => {
+        // Reset input and reload profiles
+        profileNameInput.value = ""
+        loadProfiles()
+
+        // Select the new profile
+        chrome.storage.sync.set({ activeProfile: profileId })
+
+        // Update delete button state
+        updateDeleteButtonState(Object.keys(profiles).length)
+      })
+    })
+  }
+}
+
+// Delete current profile
+function deleteProfile() {
+  const selectedProfile = profileSelector.value
+
+  // Don't allow deleting the last profile
+  chrome.storage.sync.get(["profiles", "activeProfile"], (result) => {
+    const profiles = result.profiles
+    const profileCount = Object.keys(profiles).length
+
+    if (profileCount <= 1) {
+      // Don't delete the last profile
+      return
+    }
+
+    // Delete the selected profile
+    delete profiles[selectedProfile]
+
+    // Set a new active profile if the deleted one was active
+    let newActiveProfile = result.activeProfile
+    if (newActiveProfile === selectedProfile) {
+      newActiveProfile = Object.keys(profiles)[0]
+    }
+
+    // Save updated profiles
+    chrome.storage.sync.set(
+      {
+        profiles: profiles,
+        activeProfile: newActiveProfile,
+      },
+      () => {
+        loadProfiles()
+      },
+    )
+  })
+}
+
+// Switch active profile
+function switchProfile() {
+  const selectedProfile = profileSelector.value
+
+  chrome.storage.sync.get(["profiles"], (result) => {
+    const profiles = result.profiles
+
+    // Set active profile
+    chrome.storage.sync.set({ activeProfile: selectedProfile }, () => {
+      loadDomains(profiles[selectedProfile].domains)
+    })
+  })
+}
+
+// Update delete button state based on profile count
+function updateDeleteButtonState(profileCount) {
+  if (profileCount <= 1) {
+    deleteProfileBtn.disabled = true
+    deleteProfileBtn.classList.add("disabled")
+  } else {
+    deleteProfileBtn.disabled = false
+    deleteProfileBtn.classList.remove("disabled")
+  }
+}
+
+// Event listeners
 addDomainBtn.addEventListener("click", addDomain)
 
-// Add Enter key support
-document.getElementById("domainInput").addEventListener("keypress", (e) => {
+domainInput.addEventListener("keypress", (e) => {
   if (e.key === "Enter") {
     addDomain()
   }
 })
 
-// Remove domain
 domainList.addEventListener("click", (e) => {
   if (e.target.classList.contains("remove-btn")) {
     const domain = e.target.dataset.domain
-    chrome.storage.sync.get(["blockedDomains"], (result) => {
-      const domains = result.blockedDomains.filter((d) => d !== domain)
-      chrome.storage.sync.set({ blockedDomains: domains }, loadDomains)
-    })
+    removeDomain(domain)
   }
 })
+
+profileSelector.addEventListener("change", switchProfile)
+
+addProfileBtn.addEventListener("click", addProfile)
+
+profileNameInput.addEventListener("keypress", (e) => {
+  if (e.key === "Enter") {
+    addProfile()
+  }
+})
+
+deleteProfileBtn.addEventListener("click", deleteProfile)
 
 // Handle image upload
 imageUpload.addEventListener("change", (e) => {
@@ -189,5 +373,5 @@ function compressImage(dataUrl, quality, callback) {
 }
 
 // Initialize
-loadDomains()
+loadProfiles()
 loadImage()

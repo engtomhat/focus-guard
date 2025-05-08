@@ -25,6 +25,11 @@
 ✅ **Cross-Browser Support**
 - Blocks distracting websites across multiple browsers
 
+✅ **Profile Management**
+- Manage multiple blocklists
+- Switch between profiles
+- Automatic migration from old storage format
+
 ## Architecture
 
 ```mermaid

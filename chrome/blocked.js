@@ -1,22 +1,32 @@
 // Focus Guard Blocked Page Script
 // Shows when a blocked site is accessed
 
-document.addEventListener('DOMContentLoaded', function() {
-  const originalUrl = document.getElementById('originalUrl');
-  const blockedImage = document.getElementById('blockedImage');
-  
-  // Get URL from query parameters
-  const urlParams = new URLSearchParams(window.location.search);
-  const url = urlParams.get('url');
-  
+document.addEventListener("DOMContentLoaded", () => {
+  const originalUrl = document.getElementById("originalUrl")
+  const blockedImage = document.getElementById("blockedImage")
+  const profileName = document.getElementById("profileName")
+
+  // Get URL and profile from query parameters
+  const urlParams = new URLSearchParams(window.location.search)
+  const url = urlParams.get("url")
+  const profile = urlParams.get("profile")
+
   if (url) {
-    originalUrl.textContent = url;
+    originalUrl.textContent = url
   }
-  
+
+  if (profile) {
+    profileName.textContent = profile
+  }
+
   // Load custom image if set
-  chrome.storage.local.get(['blockedImage'], function(result) {
-    if (result.blockedImage) {
-      blockedImage.src = result.blockedImage;
-    }
-  });
-});
+  if (typeof chrome !== "undefined" && chrome.storage) {
+    chrome.storage.local.get(["blockedImage"], (result) => {
+      if (result.blockedImage) {
+        blockedImage.src = result.blockedImage
+      }
+    })
+  } else {
+    console.warn("Chrome storage API is not available.")
+  }
+})

@@ -8,6 +8,24 @@
   <div class="blocked-container manager-container">
     <h1 class="blocked-title">Focus Guard Manager</h1>
     
+    <div class="profile-section">
+      <h2>Profiles</h2>
+      <p>Create and manage different blocking profiles for various activities.</p>
+      
+      <div class="profile-controls">
+        <div class="profile-selector-container">
+          <label for="profileSelector">Active Profile:</label>
+          <select id="profileSelector" class="profile-selector"></select>
+          <button id="deleteProfile" class="danger-button">Delete Profile</button>
+        </div>
+        
+        <div class="add-profile">
+          <input type="text" id="profileNameInput" placeholder="New profile name (e.g., Work, Study)">
+          <button id="addProfile">Create Profile</button>
+        </div>
+      </div>
+    </div>
+    
     <div class="domain-section">
       <h2>Blocked Domains</h2>
       <p>Add websites that distract you from your work or studies.</p>

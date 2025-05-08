@@ -8,6 +8,11 @@
   <div class="container">
     <h1>Focus Guard</h1>
     
+    <div id="profileSelectorContainer" class="profile-selector-container">
+      <label for="profileSelector">Active Profile:</label>
+      <select id="profileSelector" class="profile-selector"></select>
+    </div>
+    
     <div class="block-list">
       <h2>Blocked Domains</h2>
       <div class="domain-list">
@@ -21,8 +26,8 @@
     </div>
     
     <div class="manager-link">
-  <button id="openManager" class="secondary-button">Open Full Manager</button>
-</div>
+      <button id="openManager" class="secondary-button">Open Full Manager</button>
+    </div>
   </div>
   
   <script src="popup.js"></script>

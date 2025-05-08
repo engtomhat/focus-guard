@@ -1,55 +1,99 @@
-let blockedDomains = [];
+let activeProfile = "default"
+let profiles = {}
 
 // Function to check if a request is a tracking request
 function isTrackingRequest(url) {
   try {
-    const parsedUrl = new URL(url);
+    const parsedUrl = new URL(url)
     // Check if Facebook tracking request
-    return parsedUrl.hostname.includes('facebook.com') && 
-           parsedUrl.pathname.startsWith('/tr/');
+    return parsedUrl.hostname.includes("facebook.com") && parsedUrl.pathname.startsWith("/tr/")
   } catch (e) {
-    console.error('Invalid URL:', url, e);
-    return false;
+    console.error("Invalid URL:", url, e)
+    return false
   }
 }
 
 // Improved domain matching function
 function isDomainBlocked(urlHostname) {
-  return blockedDomains.some(blockedDomain => {
-    return (
-      urlHostname === blockedDomain ||
-      urlHostname.endsWith(`.${blockedDomain}`)
-    );
-  });
+  // Get domains from active profile
+  const activeProfileData = profiles[activeProfile]
+  if (!activeProfileData || !activeProfileData.domains) return false
+
+  return activeProfileData.domains.some((blockedDomain) => {
+    return urlHostname === blockedDomain || urlHostname.endsWith(`.${blockedDomain}`)
+  })
 }
 
-chrome.storage.sync.get(['blockedDomains'], function(result) {
-  if (result.blockedDomains) {
-    blockedDomains = result.blockedDomains;
-    console.log('Loaded blocked domains:', blockedDomains);
-  }
-});
+// Load profiles and active profile from storage
+function loadProfiles() {
+  chrome.storage.sync.get(["profiles", "activeProfile"], (result) => {
+    // If no profiles exist yet, create a default one with existing domains
+    if (!result.profiles) {
+      chrome.storage.sync.get(["blockedDomains"], (oldData) => {
+        // Migrate old data structure to new profile-based structure
+        const defaultDomains = oldData.blockedDomains || []
 
-chrome.storage.onChanged.addListener(function(changes) {
-  if (changes.blockedDomains) {
-    blockedDomains = changes.blockedDomains.newValue;
-    console.log('Updated blocked domains:', blockedDomains);
-  }
-});
+        profiles = {
+          default: {
+            name: "Default",
+            domains: defaultDomains,
+          },
+        }
 
-chrome.webNavigation.onBeforeNavigate.addListener((details) => {
-  const url = new URL(details.url);
-  console.log('Checking URL:', url.hostname);
+        // Save the new structure
+        chrome.storage.sync.set({
+          profiles: profiles,
+          activeProfile: "default",
+        })
+      })
+    } else {
+      profiles = result.profiles
+      activeProfile = result.activeProfile || "default"
+    }
 
-  if (isTrackingRequest(details.url)) {
-    console.log('Allowing tracking request');
-    return;
+    console.log("Loaded profiles:", profiles)
+    console.log("Active profile:", activeProfile)
+  })
+}
+
+// Listen for storage changes
+chrome.storage.onChanged.addListener((changes) => {
+  if (changes.profiles) {
+    profiles = changes.profiles.newValue
+    console.log("Updated profiles:", profiles)
   }
-  
-  if (isDomainBlocked(url.hostname)) {
-    console.log('Blocking domain:', url.hostname);
-    chrome.tabs.update(details.tabId, {
-      url: chrome.runtime.getURL(`blocked.html?url=${encodeURIComponent(details.url)}`)
-    });
+
+  if (changes.activeProfile) {
+    activeProfile = changes.activeProfile.newValue
+    console.log("Active profile changed to:", activeProfile)
   }
-}, {url: [{hostContains: ""}]});
+})
+
+chrome.webNavigation.onBeforeNavigate.addListener(
+  (details) => {
+    const url = new URL(details.url)
+    console.log("Checking URL:", url.hostname)
+
+    if (isTrackingRequest(details.url)) {
+      console.log("Allowing tracking request")
+      return
+    }
+
+    if (isDomainBlocked(url.hostname)) {
+      console.log("Blocking domain:", url.hostname)
+
+      // Get active profile name to pass to blocked page
+      const activeProfileName = profiles[activeProfile]?.name || "Default"
+
+      chrome.tabs.update(details.tabId, {
+        url: chrome.runtime.getURL(
+          `blocked.html?url=${encodeURIComponent(details.url)}&profile=${encodeURIComponent(activeProfileName)}`,
+        ),
+      })
+    }
+  },
+  { url: [{ hostContains: "" }] },
+)
+
+// Initialize
+loadProfiles()

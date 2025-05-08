@@ -1,6 +1,17 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
+## [1.6.0] - 2025-05-07
+### Added
+- Profile system for managing multiple blocklists
+- New profile management UI in manager page
+- Profile badge on blocked pages
+- Automatic migration from old storage format
+
+### Changed
+- Updated data structure to support profiles
+- Improved blocked page design
+
 ## [1.5.3] - 2025-05-07
 ### Changed
 - Added privacy disclaimer to README

@@ -85,7 +85,8 @@ p {
 }
 
 /* Sections */
-.domain-section {
+.domain-section,
+.profile-section {
   margin-bottom: 24px;
   max-width: 500px;
   margin-left: auto;
@@ -93,8 +94,52 @@ p {
   text-align: left;
 }
 
+.profile-section {
+  margin-bottom: 32px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--border);
+}
+
 .block-list {
   margin-bottom: 20px;
+}
+
+/* Profile selector */
+.profile-selector-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.profile-selector {
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background-color: var(--background);
+  font-size: 14px;
+  min-width: 150px;
+  flex-grow: 1;
+}
+
+.profile-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.add-profile {
+  display: flex;
+  gap: 8px;
+}
+
+#profileNameInput {
+  flex-grow: 1;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 14px;
 }
 
 /* Domain list */
@@ -178,6 +223,23 @@ button:hover {
 
 button:active {
   transform: translateY(1px);
+}
+
+.danger-button {
+  background: var(--danger);
+}
+
+.danger-button:hover {
+  background: var(--danger-hover);
+}
+
+.danger-button.disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+.danger-button.disabled:hover {
+  background: #ccc;
 }
 
 .remove-btn {
@@ -375,7 +437,18 @@ button:active {
   padding: 16px 0;
 }
 
-.bmc-btn-container {
-  display: inline-block !important;
-  margin: 8px auto 0 !important;
+/* Profile badge on blocked page */
+.profile-badge {
+  display: inline-block;
+  background-color: var(--primary);
+  color: white;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 20px;
+}
+
+.profile-badge span {
+  font-weight: 600;
 }
