@@ -5,6 +5,10 @@
 .vscode/
 .idea/
 
+# Coverage directories
+coverage/
+.nyc_output/
+
 # Ignore node modules (if added later)
 node_modules/
 

@@ -12,7 +12,8 @@
     "clean": "rm -rf dist/",
     "package": "npm run build && cd dist/chrome && zip -r ../focus-guard-chrome.zip . && cd ../firefox && zip -r ../focus-guard-firefox.zip .",
     "test": "jest",
-    "test:watch": "jest --watch"
+    "test:watch": "jest --watch",
+    "coverage": "jest --coverage"
   },
   "dependencies": {},
   "devDependencies": {
