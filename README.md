@@ -2,10 +2,16 @@
   <img src="assets/images/icons/icon128.png" width="128" alt="Focus Guard Logo">
   <h1>Focus Guard</h1>
   <p>Browser extension that protects your focus by intercepting distracting websites</p>
+  
+  <p>
+    <a href="https://www.gnu.org/licenses/gpl-3.0">
+      <img src="https://img.shields.io/badge/License-GPLv3-blue.svg" alt="License">
+    </a>
+    <a href="https://codecov.io/gh/engtomhat/focus-guard">
+      <img src="https://codecov.io/gh/engtomhat/focus-guard/branch/main/graph/badge.svg" alt="Codecov">
+    </a>
+  </p>
 </div>
-
-[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
-[![codecov](https://codecov.io/gh/engtomhat/focus-guard/branch/main/graph/badge.svg)](https://codecov.io/gh/engtomhat/focus-guard)
 
 ## Features
 
