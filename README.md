@@ -50,7 +50,7 @@ graph TD
 - **Firefox Add-ons**: [Install Here](https://addons.mozilla.org/en-US/firefox/addon/focus-guard-pro/)
 
 ### From Release Artifacts
-1. Download the latest `.zip` from [Releases](https://github.com/yourusername/focus-guard/releases)
+1. Download the latest `.zip` from [Releases](https://github.com/engtomhat/focus-guard/releases)
 2. For Chrome:
    - Go to `chrome://extensions`
    - Enable "Developer mode"
