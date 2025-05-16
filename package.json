@@ -1,12 +1,11 @@
 {
   "name": "focus-guard",
-  "version": "2.0.1",
+  "version": "2.0.0",
   "description": "Browser extension to block distracting websites",
   "main": "build.js",
   "scripts": {
     "prebuild": "npm ci",
-    "version": "node scripts/sync-versions.js",
-    "postversion": "git add manifests/*.json",
+    "version": "node scripts/sync-versions.js && git add manifests/*.json",
     "build:chrome": "node build.js chrome",
     "build:firefox": "node build.js firefox",
     "build": "npm run build:chrome && npm run build:firefox",
