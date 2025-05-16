@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Focus Guard",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Protects your focus by intercepting distracting websites",
   "browser_specific_settings": {
     "gecko": {
@@ -9,10 +9,17 @@
       "strict_min_version": "112.0"
     }
   },
-  "host_permissions": ["<all_urls>"],
-  "permissions": ["storage", "webNavigation"],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "permissions": [
+    "storage",
+    "webNavigation"
+  ],
   "background": {
-    "scripts": ["background.js"],
+    "scripts": [
+      "background.js"
+    ],
     "type": "module"
   },
   "action": {
@@ -30,19 +37,23 @@
     "32": "images/icon32.png",
     "64": "images/icon64.png"
   },
-  "web_accessible_resources": [{
-    "resources": [
-      "styles/main.css",
-      "blocked.html", 
-      "manager.html", 
-      "popup.html",
-      "blocked.js",
-      "manager.js",
-      "popup.js",
-      "images/default-blocked.png",
-      "lib/core/*.js",
-      "lib/browser/*.js"
-    ],
-    "matches": ["<all_urls>"]
-  }]
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "styles/main.css",
+        "blocked.html",
+        "manager.html",
+        "popup.html",
+        "blocked.js",
+        "manager.js",
+        "popup.js",
+        "images/default-blocked.png",
+        "lib/core/*.js",
+        "lib/browser/*.js"
+      ],
+      "matches": [
+        "<all_urls>"
+      ]
+    }
+  ]
 }
