@@ -45,29 +45,45 @@ graph TD
 
 ## Installation
 
-### Chrome
-#### Web Store
-1. Go to [Chrome Web Store](https://chromewebstore.google.com/detail/ppioeifofhgpmcbdpehndajepecngmgp)
-2. Click "Add to Chrome"
+### From Stores
+- **Chrome Web Store**: [Install Here](https://chromewebstore.google.com/detail/ppioeifofhgpmcbdpehndajepecngmgp)
+- **Firefox Add-ons**: [Install Here](https://addons.mozilla.org/en-US/firefox/addon/focus-guard-pro/)
 
-#### Local
-1. Clone this repository
-2. Go to `chrome://extensions`
-3. Enable "Developer mode"
-4. Click "Load unpacked"
-5. Select the `chrome` directory
+### From Release Artifacts
+1. Download the latest `.zip` from [Releases](https://github.com/yourusername/focus-guard/releases)
+2. For Chrome:
+   - Go to `chrome://extensions`
+   - Enable "Developer mode"
+   - Drag & drop `focus-guard-chrome.zip`
+3. For Firefox:
+   - Go to `about:debugging#/runtime/this-firefox`
+   - Click "Load Temporary Add-on"
+   - Select `focus-guard-firefox.zip`
 
-### Firefox
-#### Firefox Add-ons
-1. Go to [Firefox Add-ons](https://addons.mozilla.org/en-US/firefox/addon/focus-guard-pro/)
-2. Click "Add to Firefox"
+### Development Build
+```bash
+# Clone repository
+git clone https://github.com/yourusername/focus-guard.git
+cd focus-guard
 
-#### Local
-1. Clone this repository
-2. Go to `about:debugging`
-3. Click "This Firefox"
-4. Click "Load Temporary Add-on"
-5. Select any file in the `firefox` directory
+# Install dependencies
+npm install
+
+# Build extensions
+npm run build chrome  # Chrome build
+npm run build firefox # Firefox build
+
+# Load in browser:
+# Chrome: Load unpacked from dist/chrome
+# Firefox: Load temporary add-on from dist/firefox
+```
+
+### Key Features
+- 🚀 Background service-based blocking
+- 🛡️ Universal Manifest V3 support (Chrome & Firefox)
+- 📦 Single codebase for both browsers
+- 🔄 Automatic profile synchronization
+- ⚡ Modern ES module architecture
 
 ## Usage
 
