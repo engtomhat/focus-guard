@@ -1,6 +1,17 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
+## [2.0.0] - 2025-05-15
+### Major Changes
+- Full Manifest V3 support for both Chrome and Firefox
+- Removed content scripts in favor of background-only blocking
+- Restructured assets directory
+- Simplified build process
+
+### Requirements
+- Chrome 96+ or Firefox 109+ (with MV3 support)
+- Node.js 18+ (for development)
+
 ## [1.6.0] - 2025-05-07
 ### Added
 - Profile system for managing multiple blocklists

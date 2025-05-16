@@ -1,0 +1,15 @@
+{
+  "name": "focus-guard",
+  "version": "2.0.0",
+  "description": "Browser extension to block distracting websites",
+  "main": "build.js",
+  "scripts": {
+    "build:chrome": "node build.js chrome",
+    "build:firefox": "node build.js firefox",
+    "build": "npm run build:chrome && npm run build:firefox",
+    "clean": "rm -rf dist/",
+    "package": "npm run build && cd dist/chrome && zip -r ../focus-guard-chrome.zip . && cd ../firefox && zip -r ../focus-guard-firefox.zip ."
+  },
+  "dependencies": {},
+  "devDependencies": {}
+}
