@@ -5,6 +5,8 @@
   "main": "build.js",
   "scripts": {
     "prebuild": "npm ci",
+    "version": "node scripts/sync-versions.js",
+    "postversion": "git add manifests/*.json",
     "build:chrome": "node build.js chrome",
     "build:firefox": "node build.js firefox",
     "build": "npm run build:chrome && npm run build:firefox",
