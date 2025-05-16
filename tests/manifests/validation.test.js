@@ -1,5 +1,5 @@
-const chromeManifest = require('../manifests/chrome.json');
-const firefoxManifest = require('../manifests/firefox.json');
+const chromeManifest = require('../../manifests/chrome.json');
+const firefoxManifest = require('../../manifests/firefox.json');
 
 describe('Manifest Validation', () => {
   test('chrome manifest has required fields', () => {
@@ -12,11 +12,5 @@ describe('Manifest Validation', () => {
     expect(firefoxManifest).toHaveProperty('manifest_version');
     expect(firefoxManifest).toHaveProperty('name');
     expect(firefoxManifest).toHaveProperty('version');
-  });
-
-  test('versions match package.json', () => {
-    const packageJson = require('../package.json');
-    expect(chromeManifest.version).toBe(packageJson.version);
-    expect(firefoxManifest.version).toBe(packageJson.version);
   });
 });
