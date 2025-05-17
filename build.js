@@ -1,7 +1,10 @@
-const fs = require('fs').promises;
-const path = require('path');
-const { promisify } = require('util');
-const exec = promisify(require('child_process').exec);
+import { promises as fs } from 'fs';
+import path from 'path';
+import { promisify } from 'util';
+import { exec as _exec } from 'child_process';
+const exec = promisify(_exec);
+
+const __dirname = path.dirname(new URL(import.meta.url).pathname);
 
 async function copyDir(src, dest) {
   await fs.mkdir(dest, { recursive: true });
