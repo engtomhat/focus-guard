@@ -1,5 +1,7 @@
 // Browser API abstraction layer
 
+// Newer Firefox versions have both (chrome & browser) namespaces
+// Chromium browsers only have the chrome namespace
 const isChrome = typeof browser === 'undefined'
 
 export const storage = {
