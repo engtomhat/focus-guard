@@ -1,7 +1,6 @@
 {
   "name": "focus-guard",
-  "version": "2.0.2",
-  "type": "module",
+  "version": "2.1.0",
   "description": "Browser extension to block distracting websites",
   "main": "build.js",
   "scripts": {
