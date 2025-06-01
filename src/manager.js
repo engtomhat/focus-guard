@@ -101,31 +101,31 @@ function displayDomains() {
 
 // Load current image
 async function loadImage() {
-    imagePreview.src = await images.loadImage()
+  imagePreview.src = await images.loadImage()
 }
 
 // Add domain to current profile
 async function addDomain() {
   const domain = domainInput.value.trim()
   if (domain && !profilesData[activeProfile].domains.includes(domain)) {
-      // Add domain to active profile if it doesn't already exist
-      try {
-        await domains.addDomain(activeProfile, domain)
-        await refreshProfiles()
-        document.getElementById("domainInput").value = ""
-      } catch (error) {
-        console.error("Error adding domain:", error)
-      }
+    // Add domain to active profile if it doesn't already exist
+    try {
+      await domains.addDomain(activeProfile, domain)
+      await refreshProfiles()
+      document.getElementById("domainInput").value = ""
+    } catch (error) {
+      console.error("Error adding domain:", error)
     }
+  }
 }
 
 async function resetSettings() {
-    try {
-        await profiles.reset()
-        await init()
-    } catch (error) {
-        console.error("Error resetting settings:", error)
-    }
+  try {
+    await profiles.reset()
+    await init()
+  } catch (error) {
+    console.error("Error resetting settings:", error)
+  }
 }
 
 // Remove domain from current profile
@@ -158,7 +158,7 @@ async function addProfile() {
 }
 
 function isDefaultSelected() {
-    return profileSelector.value === "default"
+  return profileSelector.value === "default"
 }
 
 // Delete current profile
@@ -176,7 +176,7 @@ async function deleteProfile() {
   try {
     // Remove the profile
     await profiles.removeProfile(selectedProfile)
-    
+
     // Switch to first remaining profile
     await switchProfile(Object.keys(profilesData)[0])
     await refreshProfiles()
@@ -258,6 +258,24 @@ resetImageBtn.addEventListener("click", async () => {
     console.error("Failed to reset image:", error)
     alert("Failed to reset image")
   }
+})
+
+// Tab switching functionality
+const tabBtns = document.querySelectorAll(".tab-btn")
+const tabPanels = document.querySelectorAll(".tab-panel")
+
+tabBtns.forEach((btn) => {
+  btn.addEventListener("click", () => {
+    const targetTab = btn.dataset.tab
+
+    // Remove active class from all tabs and panels
+    tabBtns.forEach((b) => b.classList.remove("active"))
+    tabPanels.forEach((p) => p.classList.remove("active"))
+
+    // Add active class to clicked tab and corresponding panel
+    btn.classList.add("active")
+    document.getElementById(`${targetTab}-tab`).classList.add("active")
+  })
 })
 
 // Initialize

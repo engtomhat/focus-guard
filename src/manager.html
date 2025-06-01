@@ -9,59 +9,94 @@
   <div class="blocked-container manager-container">
     <h1 class="blocked-title">Focus Guard Manager</h1>
     
-    <div class="profile-section">
-      <h2>Profiles</h2>
-      <p>Create and manage different blocking profiles for various activities.</p>
-      
-      <div class="profile-controls">
+    <!-- Always visible profile section -->
+    <div class="profile-header">
+      <div class="active-profile-section">
+        <h2>Active Profile</h2>
         <div class="profile-selector-container">
-          <label for="profileSelector">Active Profile:</label>
+          <label for="profileSelector">Current Profile:</label>
           <select id="profileSelector" class="profile-selector"></select>
-          <button id="deleteProfile" class="danger-button">Delete Profile</button>
-        </div>
-        <button id="resetSettings" class="danger-button">Reset All Settings</button>
-        
-        <div class="add-profile">
-          <input type="text" id="profileNameInput" placeholder="New profile name (e.g., Work, Study)">
-          <button id="addProfile">Create Profile</button>
         </div>
       </div>
     </div>
     
-    <div class="domain-section">
-      <h2>Blocked Domains</h2>
-      <p>Add websites that distract you from your work or studies.</p>
-      
-      <div class="domain-list">
-        <ul id="domainList"></ul>
-      </div>
-      
-      <div class="add-domain">
-        <input type="text" id="domainInput" placeholder="Enter domain to block (e.g., facebook.com)">
-        <button id="addDomain">Add Domain</button>
-      </div>
+    <!-- Tab navigation -->
+    <div class="tab-navigation">
+      <button class="tab-btn active" data-tab="domains">Blocked Domains</button>
+      <button class="tab-btn" data-tab="appearance">Appearance</button>
+      <button class="tab-btn" data-tab="settings">Settings</button>
     </div>
     
-    <div class="image-section">
-      <h2>Focus Reminder Image</h2>
-      <p>This image will be displayed when you try to access a blocked site.</p>
+    <!-- Tab content -->
+    <div class="tab-content">
       
-      <div class="image-upload-container">
-        <div class="image-actions">
-          <label for="imageUpload" class="image-upload-label primary-action">
-            Upload Custom Image
-          </label>
-          <label id="resetImage" class="image-upload-label secondary-action">
-            Reset to Default
-          </label>
-        </div>
-        
-        <input type="file" id="imageUpload" accept="image/*">
-        
-        <div class="image-preview">
-          <img src="images/default-blocked.png" alt="Default focus reminder" id="imagePreview">
+      <!-- Blocked Domains Tab -->
+      <div id="domains-tab" class="tab-panel active">
+        <div class="tab-section">
+          <h3>Manage Blocked Domains</h3>
+          <p>Add websites that distract you from your work or studies for the current profile.</p>
+          
+          <div class="domain-list">
+            <ul id="domainList"></ul>
+          </div>
+          
+          <div class="add-domain">
+            <input type="text" id="domainInput" placeholder="Enter domain to block (e.g., facebook.com)">
+            <button id="addDomain">Add Domain</button>
+          </div>
         </div>
       </div>
+      
+      <!-- Appearance Tab -->
+      <div id="appearance-tab" class="tab-panel">
+        <div class="tab-section">
+          <h3>Focus Reminder Image</h3>
+          <p>This image will be displayed when you try to access a blocked site.</p>
+          
+          <div class="image-upload-container">
+            <div class="image-actions">
+              <label for="imageUpload" class="image-upload-label primary-action">
+                Upload Custom Image
+              </label>
+              <label id="resetImage" class="image-upload-label secondary-action">
+                Reset to Default
+              </label>
+            </div>
+            
+            <input type="file" id="imageUpload" accept="image/*">
+            
+            <div class="image-preview">
+              <img src="images/default-blocked.png" alt="Default focus reminder" id="imagePreview">
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Settings Tab -->
+      <div id="settings-tab" class="tab-panel">
+        <div class="tab-section">
+          <h3>Profile Management</h3>
+          <p>Create and manage different blocking profiles for various activities.</p>
+          
+          <div class="profile-controls">
+            <div class="add-profile">
+              <input type="text" id="profileNameInput" placeholder="New profile name (e.g., Work, Study)">
+              <button id="addProfile">Create Profile</button>
+            </div>
+            
+            <div class="profile-actions">
+              <button id="deleteProfile" class="danger-button">Delete Current Profile</button>
+            </div>
+          </div>
+        </div>
+        
+        <div class="tab-section">
+          <h3>Reset Settings</h3>
+          <p>This will delete all profiles, domains, and custom settings.</p>
+          <button id="resetSettings" class="danger-button">Reset All Settings</button>
+        </div>
+      </div>
+      
     </div>
   </div>
   
