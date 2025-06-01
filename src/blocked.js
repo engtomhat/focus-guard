@@ -3,6 +3,7 @@
 import { images } from "./lib/core/images.js"
 
 let originalUrl = ""
+let copyFeedbackSpan, errorFeedbackSpan
 
 document.addEventListener("DOMContentLoaded", () => {
   const originalUrlElement = document.getElementById("originalUrl")
@@ -11,6 +12,15 @@ document.addEventListener("DOMContentLoaded", () => {
   const copyUrlBtn = document.getElementById("copyUrlBtn")
   const urlDisplay = document.querySelector(".blocked-url-display")
   let originalUrlText = ""
+
+  // Create feedback spans once
+  copyFeedbackSpan = document.createElement('span')
+  copyFeedbackSpan.textContent = 'Link Copied!'
+  copyFeedbackSpan.style.color = 'var(--primary)'
+  
+  errorFeedbackSpan = document.createElement('span')
+  errorFeedbackSpan.textContent = 'Copy failed!'
+  errorFeedbackSpan.style.color = 'var(--danger)'
 
   // Get URL and profile from query parameters
   const urlParams = new URLSearchParams(window.location.search)
@@ -47,26 +57,24 @@ document.addEventListener("DOMContentLoaded", () => {
 
 function showCopyFeedback(urlDisplay) {
   const urlText = urlDisplay.querySelector(".url-text")
-  const originalText = urlText.innerHTML
+  const originalText = urlText.textContent
 
-  // Show "Link Copied" feedback with green text only
-  urlText.innerHTML = '<span style="color: var(--primary);">Link Copied!</span>'
+  urlText.textContent = ''
+  urlText.appendChild(copyFeedbackSpan)
 
-  // Revert back after 1 second
   setTimeout(() => {
-    urlText.innerHTML = originalText
+    urlText.textContent = originalText
   }, 1000)
 }
 
 function showErrorFeedback(urlDisplay) {
   const urlText = urlDisplay.querySelector(".url-text")
-  const originalText = urlText.innerHTML
+  const originalText = urlText.textContent
 
-  // Show error feedback with red text
-  urlText.innerHTML = '<span style="color: var(--danger);">Copy failed!</span>'
+  urlText.textContent = ''
+  urlText.appendChild(errorFeedbackSpan)
 
-  // Revert back after 1 second
   setTimeout(() => {
-    urlText.innerHTML = originalText
+    urlText.textContent = originalText
   }, 1000)
 }
