@@ -22,7 +22,7 @@ function displayProfiles() {
   const profileContainer = document.getElementById("profileSelectorContainer")
 
   // Clear existing options
-  profileSelector.innerHTML = ""
+  profileSelector.replaceChildren()
 
   const profileCount = Object.keys(profilesData).length
 
@@ -52,9 +52,7 @@ function displayDomains() {
   const domainList = document.getElementById("domainList")
 
   // Clear existing domains
-  while (domainList.firstChild) {
-    domainList.removeChild(domainList.firstChild)
-  }
+  domainList.replaceChildren()
 
   const domainsData = profilesData[activeProfile].domains
   if (domainsData && domainsData.length > 0) {
