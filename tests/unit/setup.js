@@ -27,18 +27,25 @@ vi.stubGlobal('browser', {
   webNavigation: {}
 })
 
-// Mock adapter module only
-export const mockAdapter = vi.mock('../../src/lib/browser/adapter.js', () => ({
+// Mock adapter module
+const mockAdapter = {
   storage: {
     onChanged: { addListener: vi.fn() }
   },
   webNavigation: {
-    onBeforeNavigate: { addListener: vi.fn() }
+    onBeforeNavigate: { addListener: vi.fn() },
+    tabs: {
+      update: vi.fn()
+    }
+  },
+  runtime: {
+    getURL: vi.fn()
   }
-}));
+};
+vi.mock('../../src/lib/browser/adapter.js', () => mockAdapter);
 
 // Configurable profiles mock
-export const mockProfiles = {
+const mockProfiles = {
   get: vi.fn(),
   getAll: vi.fn().mockResolvedValue({ profiles: {}, activeProfile: 'default' })
 };
@@ -47,8 +54,19 @@ vi.mock('../../src/lib/core/profiles.js', () => ({
 }));
 
 // Mock domains module
-export const mockDomains = vi.mock('../../src/lib/core/domains.js', () => ({
+const mockDomains = {
   domains: {
     isBlocked: vi.fn().mockResolvedValue(false)
   }
-}));
+};
+vi.mock('../../src/lib/core/domains.js', () => mockDomains);
+
+// Mock requests module
+const mockRequests = {
+  requests: {
+    isTrackingRequest: vi.fn().mockReturnValue(false)
+  }
+};
+vi.mock('../../src/lib/core/requests.js', () => mockRequests);
+
+export { mockAdapter, mockProfiles, mockDomains, mockRequests };
