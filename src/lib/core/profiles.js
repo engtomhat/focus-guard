@@ -4,16 +4,15 @@ import { storage } from '../browser/adapter.js'
 
 const DEFAULT_PROFILE_ID = "default"
 const DEFAULT_PROFILE_NAME = "Default"
+const createDefault = (domains = []) => {
+  return {
+    name: DEFAULT_PROFILE_NAME,
+    domains,
+    createdAt: new Date().toISOString()
+  }
+}
 
 export const profiles = {
-  createDefault(domains = []) {
-    return {
-      name: DEFAULT_PROFILE_NAME,
-      domains,
-      createdAt: new Date().toISOString()
-    }
-  },
-
   async getProfiles() {
     const { profiles } = await storage.get(['profiles'])
     return profiles
@@ -96,7 +95,7 @@ export const profiles = {
   async reset(domains = []) {
     // Create default profile with empty domains
     const profiles = {
-      [DEFAULT_PROFILE_ID]: this.createDefault(domains)
+      [DEFAULT_PROFILE_ID]: createDefault(domains)
     }
     await this.setProfiles(profiles)
     await this.setActiveProfile(DEFAULT_PROFILE_ID)

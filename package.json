@@ -1,6 +1,7 @@
 {
   "name": "focus-guard",
   "version": "2.2.0",
+  "type": "module",
   "description": "Browser extension to block distracting websites",
   "main": "build.js",
   "scripts": {
@@ -11,15 +12,12 @@
     "build": "npm run build:chrome && npm run build:firefox",
     "clean": "rm -rf dist/",
     "package": "npm run build && cd dist/chrome && zip -r ../focus-guard-chrome.zip . && cd ../firefox && zip -r ../focus-guard-firefox.zip .",
-    "test": "jest",
-    "test:watch": "jest --watch",
-    "coverage": "jest --coverage"
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "coverage": "vitest run --coverage"
   },
-  "dependencies": {},
   "devDependencies": {
-    "jest": "^29.7.0",
-    "jest-webextension-mock": "^3.2.0",
-    "@types/jest": "^29.5.6",
-    "jest-environment-jsdom": "^29.7.0"
+    "vitest": "^3.2.0",
+    "@vitest/coverage-v8": "^3.2.0"
   }
 }
