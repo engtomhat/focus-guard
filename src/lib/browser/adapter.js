@@ -24,8 +24,8 @@ export const storage = {
   },
   
   onChanged: isChrome
-    ? chrome.storage.onChanged
-    : browser.storage.onChanged
+    ? chrome.storage.sync.onChanged
+    : browser.storage.sync.onChanged
 }
 
 export const localStorage = {
