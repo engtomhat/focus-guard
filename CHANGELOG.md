@@ -3,10 +3,12 @@
 All notable changes to this project will be documented in this file.
 ## [3.0.1](https://github.com/engtomhat/focus-guard/compare/v3.0.0...v3.0.1) (2026-09-23)
 
+The version to install: 3.0.0 was not published to the stores.
 
 ### Bug Fixes
 
-* show input errors under the field; list Firefox for desktop only ([#69](https://github.com/engtomhat/focus-guard/issues/69)) ([7f8906c](https://github.com/engtomhat/focus-guard/commit/7f8906c22ba6b1ad01b6dc2ebee370fc2738d203))
+* **Error messages are shown under the field** when a domain can't be added (invalid, already blocked, or the profile is full) or a profile name is taken. They used to appear as a browser pop-up bubble, which Firefox for Android doesn't show at all ([#69](https://github.com/engtomhat/focus-guard/pull/69))
+* **Firefox for Android is not offered yet.** 3.0.0 declared Android support without it being tested; it works on Android, but the layout isn't mobile-friendly yet. Android support is planned ([#67](https://github.com/engtomhat/focus-guard/issues/67), [#69](https://github.com/engtomhat/focus-guard/pull/69))
 
 ## [3.0.0](https://github.com/engtomhat/focus-guard/compare/v2.2.1...v3.0.0) (2026-09-23)
 
