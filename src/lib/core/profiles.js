@@ -64,6 +64,17 @@ export const profiles = {
     await storage.set({ activeProfile: profileId })
   },
   
+  // Migrate pre-1.6 data only if it exists. Unlike getAll(), this never creates
+  // an empty default profile, so it is safe to run at startup: on a new device,
+  // synced profiles may not have arrived yet, and writing an empty default would
+  // overwrite them on every synced device.
+  async migrateLegacyIfPresent() {
+    const { profiles, blockedDomains } = await storage.get(['profiles', 'blockedDomains'])
+    if (!profiles && blockedDomains) {
+      await this.migrateFromLegacy()
+    }
+  },
+
   async migrateFromLegacy() {
     const oldData = await storage.get(['blockedDomains'])
     await this.reset(oldData.blockedDomains || [])

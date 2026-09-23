@@ -1,6 +1,41 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
+## [2.2.1] - 2026-09-23
+### Fixed
+- A blocked domain loaded inside an iframe (e.g. an embedded video or a like button) no longer replaces the whole tab; only top-level navigations are blocked
+- The active profile is now read on every navigation, so the right profile is enforced after the browser suspends the background worker
+- Saving a domain now reports storage errors (such as the sync storage quota) instead of failing silently
+- Installing on a new device no longer risks overwriting synced profiles with an empty default profile before browser sync has delivered them
+- Reset All Settings now also restores the default blocked image
+- `npm version` works again (the manifest version sync script failed with ENOENT)
+
+### Changed
+- Reset All Settings and Delete Profile now ask for confirmation
+- Only `http` and `https` navigations are checked
+- The Buy Me a Coffee image is bundled with the extension instead of loaded from a remote server, so the extension makes no network requests
+- Removed the Facebook tracking-path exception, which is no longer needed now that iframes are ignored
+
+### Security
+- Extension pages and scripts are no longer exposed to websites (`web_accessible_resources` removed)
+- Firefox: removed the unused `<all_urls>` host permission
+- Firefox: declares that no user data is collected (`data_collection_permissions`)
+
+### Removed
+- Unused content script left over from 1.x
+
+## [2.2.0] - 2025-06-01
+### Added
+- Tabbed manager page: Domains, Appearance and Settings (#39)
+
+### Changed
+- Replaced `innerHTML` updates with DOM APIs, as flagged by Firefox add-on review (#41)
+- Improved feedback messages across the UI
+
+## [2.1.0] - 2025-05-30
+### Added
+- Copy URL button on the blocked page (#38)
+
 ## [2.0.0] - 2025-05-15
 ### Major Changes
 - Full Manifest V3 support for both Chrome and Firefox

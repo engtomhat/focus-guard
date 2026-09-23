@@ -72,6 +72,13 @@ function displayDomains() {
   }
 }
 
+// Show an error on an input using the browser's built-in validation bubble
+function showInputError(input, message) {
+  input.setCustomValidity(message)
+  input.reportValidity()
+  input.addEventListener("input", () => input.setCustomValidity(""), { once: true })
+}
+
 // Add new domain to active profile
 async function addDomain() {
   const domain = document.getElementById("domainInput").value.trim()
@@ -83,6 +90,7 @@ async function addDomain() {
       document.getElementById("domainInput").value = ""
     } catch (error) {
       console.error("Error adding domain:", error)
+      showInputError(document.getElementById("domainInput"), `Could not save: ${error.message}`)
     }
   }
 }

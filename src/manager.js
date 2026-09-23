@@ -104,6 +104,13 @@ async function loadImage() {
   imagePreview.src = await images.loadImage()
 }
 
+// Show an error on an input using the browser's built-in validation bubble
+function showInputError(input, message) {
+  input.setCustomValidity(message)
+  input.reportValidity()
+  input.addEventListener("input", () => input.setCustomValidity(""), { once: true })
+}
+
 // Add domain to current profile
 async function addDomain() {
   const domain = domainInput.value.trim()
@@ -115,13 +122,19 @@ async function addDomain() {
       document.getElementById("domainInput").value = ""
     } catch (error) {
       console.error("Error adding domain:", error)
+      showInputError(domainInput, `Could not save: ${error.message}`)
     }
   }
 }
 
 async function resetSettings() {
+  if (!confirm("Reset all settings? This deletes all profiles and blocked domains and restores the default image.")) {
+    return
+  }
+
   try {
     await profiles.reset()
+    await images.resetImage()
     await init()
   } catch (error) {
     console.error("Error resetting settings:", error)
@@ -170,6 +183,11 @@ async function deleteProfile() {
 
   if (selectedProfile === "default" || profileCount <= 1) {
     // Don't delete the default profile, the last profile, or non-existent profile
+    return
+  }
+
+  const profileName = profilesData[selectedProfile]?.name || selectedProfile
+  if (!confirm(`Delete profile "${profileName}" and its blocked domains?`)) {
     return
   }
 

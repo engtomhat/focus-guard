@@ -1,57 +1,89 @@
-import { describe, it, expect } from 'vitest';
-import { mockAdapter, mockProfiles, mockDomains, mockRequests } from './setup.js';
+import { describe, it, expect, beforeAll, beforeEach, vi } from 'vitest';
+import { mockAdapter, mockProfiles } from './setup.js';
+
+const PROFILES = {
+  default: { name: 'Default', domains: ['example.com'] },
+  work: { name: 'Work', domains: ['social.test'] }
+};
+
+let handler;
+
+beforeAll(async () => {
+  await import('../../src/background.js');
+  handler = mockAdapter.webNavigation.onBeforeNavigate.addListener.mock.calls[0][0];
+});
+
+beforeEach(() => {
+  mockAdapter.webNavigation.tabs.update.mockClear().mockResolvedValue({});
+  mockAdapter.runtime.getURL.mockReset().mockImplementation(path => `ext://${path}`);
+  mockProfiles.getProfiles.mockReset().mockResolvedValue(PROFILES);
+  mockProfiles.getActiveProfileId.mockReset().mockResolvedValue('default');
+});
+
+const navigate = (url, extra = {}) => handler({ url, tabId: 7, frameId: 0, ...extra });
 
 describe('background.js', () => {
-  it('sets up storage listeners', async () => {
-    await import('../../src/background.js');
-    expect(mockAdapter.storage.onChanged.addListener).toHaveBeenCalled();
-    expect(mockAdapter.webNavigation.onBeforeNavigate.addListener).toHaveBeenCalled();
+  it('registers the navigation listener for http(s) only', () => {
+    const filter = mockAdapter.webNavigation.onBeforeNavigate.addListener.mock.calls[0][1];
+    expect(filter).toEqual({ url: [{ schemes: ['http', 'https'] }] });
   });
 
-  it('loads profiles on initialization', async () => {
-    await import('../../src/background.js');
-    expect(mockProfiles.getAll).toHaveBeenCalled();
+  it('only migrates legacy data on startup and never creates a default profile', () => {
+    expect(mockProfiles.migrateLegacyIfPresent).toHaveBeenCalled();
+    expect(mockProfiles.getAll).not.toHaveBeenCalled();
   });
 
-  it('checks domains with active profile', async () => {
-    // Import background.js and wait for initialization
-    await import('../../src/background.js');
-    
-    // Trigger navigation
-    const details = { url: 'https://example.com', tabId: 1 };
-    mockAdapter.webNavigation.onBeforeNavigate.addListener.mock.calls[0][0](details);
-  
-    // Verify
-    expect(mockRequests.requests.isTrackingRequest).toHaveBeenCalledWith('https://example.com');
-    expect(mockDomains.domains.isBlocked).toHaveBeenCalledWith('example.com', 'default');
-  });
+  it('redirects a blocked top-level navigation to the blocked page', async () => {
+    const url = 'https://www.example.com/page';
+    await navigate(url);
 
-  it('redirects to blocked page', async () => {
-
-    // Mock isBlocked to return true
-    mockDomains.domains.isBlocked.mockResolvedValue(true);
-
-    // Mock runtime.getURL to return a URL
-    mockAdapter.runtime.getURL.mockReturnValue('test-url');
-    
-    // Import background.js and wait for initialization
-    await import('../../src/background.js');
-    
-    // Trigger navigation
-    const testURL = 'https://example.com'
-    const testUriEncoded = encodeURIComponent(testURL)
-    const testTabId = 1
-    const details = { url: testURL, tabId: testTabId };
-    const handler = mockAdapter.webNavigation.onBeforeNavigate.addListener.mock.calls[0][0];
-    await handler(details);
-  
-    // Verify
-    expect(mockRequests.requests.isTrackingRequest).toHaveBeenCalledWith('https://example.com');
-    expect(mockDomains.domains.isBlocked).toHaveBeenCalledWith('example.com', 'default');
-    // Verify runtime.getURL was called with the correct URL (encoded)
-    expect(mockAdapter.runtime.getURL).toHaveBeenCalledWith(`blocked.html?url=${testUriEncoded}&profile=Default`);
-    expect(mockAdapter.webNavigation.tabs.update).toHaveBeenCalledWith(testTabId, {
-      url: 'test-url'
+    expect(mockAdapter.runtime.getURL).toHaveBeenCalledWith(
+      `blocked.html?url=${encodeURIComponent(url)}&profile=Default`
+    );
+    expect(mockAdapter.webNavigation.tabs.update).toHaveBeenCalledWith(7, {
+      url: `ext://blocked.html?url=${encodeURIComponent(url)}&profile=Default`
     });
+  });
+
+  it('does not redirect domains that are not blocked', async () => {
+    await navigate('https://notexample.com/');
+    expect(mockAdapter.webNavigation.tabs.update).not.toHaveBeenCalled();
+  });
+
+  it('ignores blocked domains loaded in subframes (iframes)', async () => {
+    await navigate('https://example.com/embed', { frameId: 3 });
+    expect(mockAdapter.webNavigation.tabs.update).not.toHaveBeenCalled();
+  });
+
+  it('reads the active profile from storage on every navigation', async () => {
+    mockProfiles.getActiveProfileId.mockResolvedValue('work');
+
+    await navigate('https://example.com/');
+    expect(mockAdapter.webNavigation.tabs.update).not.toHaveBeenCalled();
+
+    await navigate('https://social.test/');
+    expect(mockAdapter.webNavigation.tabs.update).toHaveBeenCalledTimes(1);
+    expect(mockAdapter.runtime.getURL.mock.calls[0][0]).toContain('profile=Work');
+  });
+
+  it('falls back to the default profile when the active profile is missing', async () => {
+    mockProfiles.getActiveProfileId.mockResolvedValue('deleted_profile');
+    await navigate('https://example.com/');
+    expect(mockAdapter.webNavigation.tabs.update).toHaveBeenCalledTimes(1);
+  });
+
+  it('does nothing before any profiles exist', async () => {
+    mockProfiles.getProfiles.mockResolvedValue(undefined);
+    await navigate('https://example.com/');
+    expect(mockAdapter.webNavigation.tabs.update).not.toHaveBeenCalled();
+  });
+
+  it('handles a failed tab update without throwing', async () => {
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
+    mockAdapter.webNavigation.tabs.update.mockRejectedValue(new Error('No tab with id: 7'));
+
+    await expect(navigate('https://example.com/')).resolves.toBeUndefined();
+    expect(consoleError).toHaveBeenCalled();
+    consoleError.mockRestore();
   });
 });

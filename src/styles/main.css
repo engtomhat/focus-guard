@@ -488,6 +488,11 @@ button:active {
   padding: 16px 0;
 }
 
+.bmc-container img {
+  height: 50px;
+  width: auto;
+}
+
 /* Profile header - always visible */
 .profile-header {
   margin-bottom: 24px;

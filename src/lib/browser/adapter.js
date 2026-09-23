@@ -4,22 +4,31 @@
 // Chromium browsers only have the chrome namespace
 const isChrome = typeof browser === 'undefined'
 
+// Wrap a callback-style chrome.* call in a promise that rejects on
+// chrome.runtime.lastError instead of silently resolving (e.g. sync quota errors)
+const chromeCall = (fn) => new Promise((resolve, reject) => {
+  fn((result) => {
+    const error = chrome.runtime.lastError
+    error ? reject(new Error(error.message)) : resolve(result)
+  })
+})
+
 export const storage = {
   get: (keys) => {
     return isChrome 
-      ? new Promise(resolve => chrome.storage.sync.get(keys, resolve))
+      ? chromeCall(callback => chrome.storage.sync.get(keys, callback))
       : browser.storage.sync.get(keys)
   },
   
   set: (items) => {
     return isChrome
-      ? new Promise(resolve => chrome.storage.sync.set(items, resolve))
+      ? chromeCall(callback => chrome.storage.sync.set(items, callback))
       : browser.storage.sync.set(items)
   },
   
   remove: (keys) => {
     return isChrome
-      ? new Promise(resolve => chrome.storage.sync.remove(keys, resolve))
+      ? chromeCall(callback => chrome.storage.sync.remove(keys, callback))
       : browser.storage.sync.remove(keys)
   },
   
