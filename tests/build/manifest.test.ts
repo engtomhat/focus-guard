@@ -77,12 +77,13 @@ describe.each(['chrome', 'firefox'] as const)('%s production build', (browser) =
 
 describe('firefox-specific manifest', () => {
   it('keeps the published add-on id and settings', () => {
-    const { gecko, gecko_android } = builds.firefox.manifest.browser_specific_settings;
-    expect(gecko.id).toBe('focusguard@example.com');
-    expect(gecko.data_collection_permissions).toEqual({ required: ['none'] });
-    // Must be at least the versions that support data_collection_permissions (AMO warns otherwise)
-    expect(gecko.strict_min_version).toBe('140.0');
-    expect(gecko_android.strict_min_version).toBe('142.0');
+    const settings = builds.firefox.manifest.browser_specific_settings;
+    expect(settings.gecko.id).toBe('focusguard@example.com');
+    expect(settings.gecko.data_collection_permissions).toEqual({ required: ['none'] });
+    // The first version that supports data_collection_permissions (AMO warns otherwise)
+    expect(settings.gecko.strict_min_version).toBe('140.0');
+    // Declaring gecko_android lists the add-on for Firefox for Android: only once it's tested (#67)
+    expect(settings).not.toHaveProperty('gecko_android');
   });
 
   it('uses an event page background (Firefox has no service workers for extensions)', () => {

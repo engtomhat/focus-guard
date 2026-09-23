@@ -131,6 +131,15 @@ describe('Firefox UI', () => {
     await expect.poll(() => ext.runInPage(profilesByName)).toEqual({ Default: [] });
   });
 
+  it('options: a duplicate profile name is explained under the field', async () => {
+    await openOptions();
+    await script(`document.getElementById('tab-settings').click()`);
+    await ext.driver.findElement(By.id('profileNameInput')).sendKeys('work');
+    await ext.driver.findElement(By.id('addProfile')).click();
+    await expect.poll(() => script(`return document.getElementById('profileNameInput-error').hidden`)).toBe(false);
+    expect(await script(`return document.getElementById('profileNameInput-error').textContent`)).toBe('A profile named "work" already exists');
+  });
+
   it('follows the system dark mode setting', async () => {
     const background = async () => {
       await ext.openExtensionPage('/options.html');

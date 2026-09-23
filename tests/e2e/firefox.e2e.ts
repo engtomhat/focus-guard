@@ -65,8 +65,12 @@ describe('Firefox', () => {
     await ext.driver.findElement(By.id('domainInput')).sendKeys('not a domain');
     await ext.driver.findElement(By.id('addDomain')).click();
     await sleep(300);
-    const message = await ext.driver.executeScript<string>(`return document.getElementById('domainInput').validationMessage`);
-    expect(message).toMatch(/not a valid domain/);
+    // Shown as text under the field (the browser's bubble isn't shown on every platform)
+    const error = await ext.driver.executeScript<{ hidden: boolean; text: string; invalid: string | null }>(`
+      const error = document.getElementById('domainInput-error');
+      return { hidden: error.hidden, text: error.textContent, invalid: document.getElementById('domainInput').getAttribute('aria-invalid') };`);
+    expect(error).toMatchObject({ hidden: false, invalid: 'true' });
+    expect(error.text).toMatch(/not a valid domain/);
     const { sync } = await ext.storage();
     expect((sync['profile:default'] as { domains: string[] }).domains).toContain('www.typed.test');
   });

@@ -11,11 +11,24 @@ export function byId<T extends HTMLElement = HTMLElement>(id: string): T {
   return element as T
 }
 
-/** Show an error on an input using the browser's built-in validation bubble */
+/**
+ * Show an error as text under an input (the element with id "<input id>-error").
+ * Text works everywhere; the browser's own validation bubble isn't shown on
+ * Firefox for Android. The input is marked invalid for screen readers, and the
+ * error clears as soon as the user edits the field.
+ */
 export function showInputError(input: HTMLInputElement, message: string): void {
+  const error = byId(`${input.id}-error`)
+  error.textContent = message
+  error.hidden = false
   input.setCustomValidity(message)
-  input.reportValidity()
-  input.addEventListener("input", () => input.setCustomValidity(""), { once: true })
+  input.setAttribute("aria-invalid", "true")
+  input.addEventListener("input", () => {
+    error.textContent = ""
+    error.hidden = true
+    input.setCustomValidity("")
+    input.removeAttribute("aria-invalid")
+  }, { once: true })
 }
 
 /** The message to show for a failed action: our own validation messages as-is, anything else generic */

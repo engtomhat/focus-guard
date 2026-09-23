@@ -40,7 +40,7 @@
 - Preview of the current image in the manager
 
 ✅ **Cross-Browser Support**
-- Chrome (and Chromium-based browsers) and Firefox 140+ (Firefox for Android 142+), from one codebase
+- Chrome (and Chromium-based browsers) and Firefox 140+, from one codebase (Firefox for Android: [planned](https://github.com/engtomhat/focus-guard/issues/67))
 
 ✅ **Profile Management**
 - Manage multiple blocklists

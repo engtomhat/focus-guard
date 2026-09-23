@@ -124,6 +124,16 @@ describe('Chromium UI', () => {
     await page.close();
   });
 
+  it('options: a duplicate profile name is explained under the field', async () => {
+    const page = await openOptions();
+    await page.click('#tab-settings');
+    await page.fill('#profileNameInput', 'work');
+    await page.click('#addProfile');
+    await expect.poll(() => page.isVisible('#profileNameInput-error')).toBe(true);
+    expect(await page.textContent('#profileNameInput-error')).toBe('A profile named "work" already exists');
+    await page.close();
+  });
+
   it('follows the system dark mode setting', async () => {
     const page = await openOptions();
     await page.emulateMedia({ colorScheme: 'dark' });

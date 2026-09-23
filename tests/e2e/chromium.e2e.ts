@@ -68,8 +68,14 @@ describe('Chromium', () => {
 
     await popup.fill('#domainInput', 'not a domain');
     await popup.click('#addDomain');
-    await expect.poll(() => popup.$eval('#domainInput', el => (el as HTMLInputElement).validationMessage))
-      .toMatch(/not a valid domain/);
+    // Shown as text under the field (the browser's bubble isn't shown on every platform)
+    await expect.poll(() => popup.isVisible('#domainInput-error')).toBe(true);
+    expect(await popup.textContent('#domainInput-error')).toMatch(/not a valid domain/);
+    expect(await popup.getAttribute('#domainInput', 'aria-invalid')).toBe('true');
+    // Editing the field clears it
+    await popup.type('#domainInput', 'x');
+    expect(await popup.isVisible('#domainInput-error')).toBe(false);
+    expect(await popup.getAttribute('#domainInput', 'aria-invalid')).toBeNull();
     await popup.close();
   });
 

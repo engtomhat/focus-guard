@@ -637,8 +637,16 @@ button:active {
   font-size: 14px;
 }
 
+.input-error {
+  margin: 6px 0 0;
+  color: var(--danger);
+  font-size: 14px;
+  text-align: left;
+}
+
 .status-message.error,
-.copy-status.error {
+.copy-status.error,
+.input-error {
   color: var(--danger);
 }
 
@@ -651,7 +659,8 @@ button:active {
 
 @media (prefers-color-scheme: dark) {
   .status-message.error,
-  .copy-status.error {
+  .copy-status.error,
+  .input-error {
     color: #ef9a9a;
   }
 }
