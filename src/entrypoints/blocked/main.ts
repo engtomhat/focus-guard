@@ -3,69 +3,42 @@
 import { loadImage } from "@/lib/storage"
 import { byId } from "@/lib/ui/dom"
 
-let copyFeedbackSpan: HTMLSpanElement
-let errorFeedbackSpan: HTMLSpanElement
+const FEEDBACK_MS = 1500
 
 document.addEventListener("DOMContentLoaded", () => {
-  const originalUrlElement = byId("originalUrl")
-  const blockedImage = byId<HTMLImageElement>("blockedImage")
-  const profileName = byId("profileName")
-  const copyUrlBtn = byId("copyUrlBtn")
-  const urlDisplay = document.querySelector<HTMLElement>(".blocked-url-display")
-  let originalUrlText = ""
+  const params = new URLSearchParams(window.location.search)
+  const url = params.get("url") ?? ""
+  const profile = params.get("profile")
 
-  // Create feedback spans once
-  copyFeedbackSpan = document.createElement('span')
-  copyFeedbackSpan.textContent = 'Link Copied!'
-  copyFeedbackSpan.style.color = 'var(--primary)'
-
-  errorFeedbackSpan = document.createElement('span')
-  errorFeedbackSpan.textContent = 'Copy failed!'
-  errorFeedbackSpan.style.color = 'var(--danger)'
-
-  // Get URL and profile from query parameters
-  const urlParams = new URLSearchParams(window.location.search)
-  const url = urlParams.get("url")
-  const profile = urlParams.get("profile")
-
-  if (url) {
-    originalUrlElement.textContent = url
-    originalUrlText = url
-  }
-
+  byId("originalUrl").textContent = url
   if (profile) {
-    profileName.textContent = profile
+    byId("profileName").textContent = profile
   }
 
   // Load custom image if set
   loadImage().then((image) => {
-    blockedImage.src = image
+    byId<HTMLImageElement>("blockedImage").src = image
   })
 
-  // Copy URL functionality
-  copyUrlBtn.addEventListener("click", async () => {
+  // Copy URL: feedback goes into its own status element, so repeated clicks
+  // can never overwrite the URL text
+  const copyStatus = byId("copyStatus")
+  let clearFeedback: ReturnType<typeof setTimeout> | undefined
+
+  function showFeedback(message: string, isError: boolean) {
+    copyStatus.textContent = message
+    copyStatus.classList.toggle("error", isError)
+    clearTimeout(clearFeedback)
+    clearFeedback = setTimeout(() => { copyStatus.textContent = "" }, FEEDBACK_MS)
+  }
+
+  byId("copyUrlBtn").addEventListener("click", async () => {
     try {
-      await navigator.clipboard.writeText(originalUrlText)
-      showFeedback(urlDisplay, copyFeedbackSpan)
-    } catch (err) {
-      console.error("Failed to copy URL:", err)
-      // Show error feedback instead of fallback
-      showFeedback(urlDisplay, errorFeedbackSpan)
+      await navigator.clipboard.writeText(url)
+      showFeedback("Link copied!", false)
+    } catch (error) {
+      console.error("Failed to copy URL:", error)
+      showFeedback("Copy failed", true)
     }
   })
 })
-
-function showFeedback(urlDisplay: HTMLElement | null, feedbackSpan: HTMLSpanElement) {
-  const urlText = urlDisplay?.querySelector(".url-text")
-  if (!urlText) {
-    return
-  }
-  const originalText = urlText.textContent
-
-  urlText.textContent = ''
-  urlText.appendChild(feedbackSpan)
-
-  setTimeout(() => {
-    urlText.textContent = originalText
-  }, 1000)
-}

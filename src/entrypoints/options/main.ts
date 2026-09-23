@@ -1,15 +1,12 @@
-import { DEFAULT_PROFILE_ID, resolveActiveProfileId } from "@/lib/core/profiles"
-import type { Profiles } from "@/lib/core/types"
-import { images } from "@/lib/images"
+import { DEFAULT_PROFILE_ID } from "@/lib/core/profiles"
+import { prepareImage } from "@/lib/images"
 import { migrate } from "@/lib/migration"
 import {
-  addDomain as storeAddDomain,
-  addProfile as storeAddProfile,
-  ensureProfiles,
-  getActiveProfileId,
-  loadImage as storeLoadImage,
-  onProfilesChanged,
-  removeDomain as storeRemoveDomain,
+  addProfile,
+  exportBackup,
+  importProfiles,
+  loadImage,
+  parseBackup,
   removeProfile,
   resetAll,
   resetImage,
@@ -17,116 +14,70 @@ import {
   setActiveProfileId,
 } from "@/lib/storage"
 import { byId, showInputError, userMessage } from "@/lib/ui/dom"
+import { createProfileView, type ProfileViewState } from "@/lib/ui/profile-view"
+import { setUpTabs } from "@/lib/ui/tabs"
 
-// DOM elements
-const domainInput = byId<HTMLInputElement>("domainInput")
-const addDomainBtn = byId<HTMLButtonElement>("addDomain")
-const domainList = byId<HTMLUListElement>("domainList")
-const imageUpload = byId<HTMLInputElement>("imageUpload")
 const imagePreview = byId<HTMLImageElement>("imagePreview")
-const resetImageBtn = byId("resetImage")
-const profileSelector = byId<HTMLSelectElement>("profileSelector")
+const imageUpload = byId<HTMLInputElement>("imageUpload")
+const imageStatus = byId("imageStatus")
 const profileNameInput = byId<HTMLInputElement>("profileNameInput")
-const addProfileBtn = byId<HTMLButtonElement>("addProfile")
 const deleteProfileBtn = byId<HTMLButtonElement>("deleteProfile")
-const resetSettingsBtn = byId<HTMLButtonElement>("resetSettings")
+const importFile = byId<HTMLInputElement>("importFile")
+const backupStatus = byId("backupStatus")
 
-let activeProfile = "default"
-let profilesData: Profiles = {}
+const view = createProfileView(
+  {
+    selector: byId<HTMLSelectElement>("profileSelector"),
+    domainList: byId("domainList"),
+    domainInput: byId<HTMLInputElement>("domainInput"),
+    addButton: byId("addDomain"),
+  },
+  { onRender: updateDeleteButton },
+)
 
-// Initialize
-async function init() {
-  await refreshProfiles()
-  await loadImage()
+// The Default profile and the last remaining profile can't be deleted
+function updateDeleteButton({ profiles, activeProfileId }: ProfileViewState) {
+  deleteProfileBtn.disabled = activeProfileId === DEFAULT_PROFILE_ID || Object.keys(profiles).length <= 1
+  deleteProfileBtn.classList.toggle("disabled", deleteProfileBtn.disabled)
 }
 
-async function refreshProfiles() {
-  await loadProfiles()
-  displayProfiles()
-  displayDomains()
-  updateDeleteButtonState()
+const count = (n: number, singular: string, plural = `${singular}s`) => `${n} ${n === 1 ? singular : plural}`
+
+function setStatus(element: HTMLElement, message: string, isError = false) {
+  element.textContent = message
+  element.classList.toggle("error", isError)
 }
 
-async function loadProfiles() {
-  profilesData = await ensureProfiles()
-  activeProfile = resolveActiveProfileId(await getActiveProfileId(), profilesData) ?? DEFAULT_PROFILE_ID
-}
+// Profiles ------------------------------------------------------------------
 
-// Load profiles and populate selector
-function displayProfiles() {
-  // Clear existing options
-  profileSelector.replaceChildren()
-
-  // Populate profile selector
-  Object.entries(profilesData).forEach(([profileId, profile]) => {
-    const option = document.createElement("option")
-    option.value = profileId
-    option.textContent = profile.name
-
-    if (profileId === activeProfile) {
-      option.selected = true
-    }
-
-    profileSelector.appendChild(option)
-  })
-
-  // Update delete button state
-  updateDeleteButtonState()
-}
-
-// Update delete button state based on profile count
-function updateDeleteButtonState() {
-  const profileCount = Object.keys(profilesData).length
-  if (profileCount <= 1 || isDefaultSelected()) {
-    deleteProfileBtn.disabled = true
-    deleteProfileBtn.classList.add("disabled")
-  } else {
-    deleteProfileBtn.disabled = false
-    deleteProfileBtn.classList.remove("disabled")
-  }
-}
-
-// Load domains for the selected profile
-function displayDomains() {
-  const domainsData = profilesData[activeProfile]?.domains
-
-  domainList.replaceChildren()
-
-  if (domainsData && domainsData.length > 0) {
-    domainsData.forEach((domain) => {
-      const li = document.createElement("li")
-      const span = document.createElement("span")
-      span.textContent = domain
-
-      const button = document.createElement("button")
-      button.className = "remove-btn"
-      button.textContent = "-"
-      button.dataset.domain = domain
-      button.setAttribute("aria-label", `Remove ${domain}`)
-
-      li.append(span, button)
-      domainList.appendChild(li)
-    })
-  }
-}
-
-// Load current image
-async function loadImage() {
-  imagePreview.src = await storeLoadImage()
-}
-
-// Add domain to current profile
-async function addDomain() {
-  if (!domainInput.value.trim()) {
+async function createProfile() {
+  if (!profileNameInput.value.trim()) {
     return
   }
   try {
-    await storeAddDomain(activeProfile, domainInput.value)
-    domainInput.value = ""
-    await refreshProfiles()
+    const profileId = await addProfile(profileNameInput.value)
+    profileNameInput.value = ""
+    await setActiveProfileId(profileId)
+    await view.refresh()
   } catch (error) {
-    console.error("Error adding domain:", error)
-    showInputError(domainInput, userMessage(error))
+    console.error("Error adding profile:", error)
+    showInputError(profileNameInput, userMessage(error))
+  }
+}
+
+async function deleteProfile() {
+  const { profiles, activeProfileId } = view.state
+  const name = profiles[activeProfileId]?.name ?? activeProfileId
+  if (deleteProfileBtn.disabled || !confirm(`Delete profile "${name}" and its blocked domains?`)) {
+    return
+  }
+  try {
+    // Removing the active profile switches this device back to Default
+    await removeProfile(activeProfileId)
+    await view.refresh()
+  } catch (error) {
+    console.error("Error deleting profile:", error)
+    alert(userMessage(error))
   }
 }
 
@@ -134,168 +85,114 @@ async function resetSettings() {
   if (!confirm("Reset all settings? This deletes all profiles and blocked domains and restores the default image.")) {
     return
   }
-
   try {
     await resetAll()
-    await init()
+    await Promise.all([view.refresh(), showImage()])
   } catch (error) {
     console.error("Error resetting settings:", error)
   }
 }
 
-// Remove domain from current profile
-async function removeDomain(domain: string | undefined) {
-  if (domain) {
-    try {
-      await storeRemoveDomain(activeProfile, domain)
-      await refreshProfiles()
-    } catch (error) {
-      console.error("Error removing domain:", error)
-    }
-  }
-}
-
-// Add new profile
-async function addProfile() {
-  if (!profileNameInput.value.trim()) {
-    return
-  }
-  try {
-    const profileId = await storeAddProfile(profileNameInput.value)
-    profileNameInput.value = ""
-    // Switch to new profile
-    await switchProfile(profileId)
-  } catch (error) {
-    console.error("Error adding profile:", error)
-    showInputError(profileNameInput, userMessage(error))
-  }
-}
-
-function isDefaultSelected() {
-  return profileSelector.value === DEFAULT_PROFILE_ID
-}
-
-// Delete current profile
-async function deleteProfile() {
-  const selectedProfile = profileSelector.value
-
-  // Don't allow deleting the last profile
-  const profileCount = Object.keys(profilesData).length
-
-  if (selectedProfile === DEFAULT_PROFILE_ID || profileCount <= 1) {
-    // Don't delete the default profile, the last profile, or non-existent profile
-    return
-  }
-
-  const profileName = profilesData[selectedProfile]?.name || selectedProfile
-  if (!confirm(`Delete profile "${profileName}" and its blocked domains?`)) {
-    return
-  }
-
-  try {
-    // Removing the active profile switches this device back to Default
-    await removeProfile(selectedProfile)
-    await refreshProfiles()
-  } catch (error) {
-    console.error("Error deleting profile:", error)
-  }
-}
-
-// Switch active profile
-async function switchProfileToSelected() {
-  await switchProfile(profileSelector.value)
-}
-
-async function switchProfile(profileId: string) {
-  try {
-    await setActiveProfileId(profileId)
-    await refreshProfiles()
-  } catch (error) {
-    console.error("Error switching profile:", error)
-  }
-}
-
-// Event listeners
-addDomainBtn.addEventListener("click", addDomain)
-resetSettingsBtn.addEventListener("click", resetSettings)
-
-domainInput.addEventListener("keypress", (e) => {
-  if (e.key === "Enter") {
-    addDomain()
+byId("addProfile").addEventListener("click", createProfile)
+profileNameInput.addEventListener("keydown", (event) => {
+  if (event.key === "Enter") {
+    createProfile()
   }
 })
-
-domainList.addEventListener("click", (e) => {
-  const target = e.target
-  if (target instanceof HTMLElement && target.classList.contains("remove-btn")) {
-    removeDomain(target.dataset.domain)
-  }
-})
-
-profileSelector.addEventListener("change", switchProfileToSelected)
-
-addProfileBtn.addEventListener("click", addProfile)
-
-profileNameInput.addEventListener("keypress", (e) => {
-  if (e.key === "Enter") {
-    addProfile()
-  }
-})
-
 deleteProfileBtn.addEventListener("click", deleteProfile)
+byId("resetSettings").addEventListener("click", resetSettings)
 
-// Handle image upload
-imageUpload.addEventListener("change", () => {
+// Blocked page image --------------------------------------------------------
+
+async function showImage() {
+  imagePreview.src = await loadImage()
+}
+
+byId("uploadImage").addEventListener("click", () => imageUpload.click())
+
+imageUpload.addEventListener("change", async () => {
   const file = imageUpload.files?.[0]
-  if (file) {
-    const reader = new FileReader()
-    reader.onload = async () => {
-      try {
-        // Compress and save image using images module
-        const compressed = await images.compressImage(reader.result as string, 0.7)
-        await saveImage(compressed)
-        // Load the image using the manager's loadImage function
-        await loadImage()
-      } catch (error) {
-        console.error("Failed to process image:", error)
-        alert("Failed to process image. Please try a different image.")
-      }
-    }
-    reader.readAsDataURL(file)
+  imageUpload.value = ""
+  if (!file) {
+    return
+  }
+  setStatus(imageStatus, "Processing image…")
+  try {
+    await saveImage(await prepareImage(file))
+    await showImage()
+    setStatus(imageStatus, "Image saved")
+  } catch (error) {
+    console.error("Failed to process image:", error)
+    setStatus(imageStatus, userMessage(error), true)
   }
 })
 
-// Reset image to default
-resetImageBtn.addEventListener("click", async () => {
+byId("resetImage").addEventListener("click", async () => {
   try {
     await resetImage()
-    await loadImage()
+    await showImage()
+    setStatus(imageStatus, "Default image restored")
   } catch (error) {
     console.error("Failed to reset image:", error)
-    alert("Failed to reset image")
+    setStatus(imageStatus, userMessage(error), true)
   }
 })
 
-// Tab switching functionality
-const tabBtns = document.querySelectorAll<HTMLElement>(".tab-btn")
-const tabPanels = document.querySelectorAll<HTMLElement>(".tab-panel")
+// Backup --------------------------------------------------------------------
 
-tabBtns.forEach((btn) => {
-  btn.addEventListener("click", () => {
-    const targetTab = btn.dataset.tab
-
-    // Remove active class from all tabs and panels
-    tabBtns.forEach((b) => b.classList.remove("active"))
-    tabPanels.forEach((p) => p.classList.remove("active"))
-
-    // Add active class to clicked tab and corresponding panel
-    btn.classList.add("active")
-    byId(`${targetTab}-tab`).classList.add("active")
-  })
+byId("exportBackup").addEventListener("click", async () => {
+  try {
+    const backup = await exportBackup()
+    const url = URL.createObjectURL(new Blob([JSON.stringify(backup, null, 2)], { type: "application/json" }))
+    const link = document.createElement("a")
+    link.href = url
+    link.download = `focus-guard-backup-${backup.exportedAt.slice(0, 10)}.json`
+    link.click()
+    setTimeout(() => URL.revokeObjectURL(url), 1000)
+    const domains = Object.values(backup.profiles).reduce((sum, profile) => sum + profile.domains.length, 0)
+    setStatus(backupStatus, `Exported ${count(Object.keys(backup.profiles).length, "profile")} with ${count(domains, "domain")}`)
+  } catch (error) {
+    console.error("Export failed:", error)
+    setStatus(backupStatus, userMessage(error), true)
+  }
 })
 
-// Changes from the popup or another device
-onProfilesChanged(() => { refreshProfiles() })
+byId("importBackup").addEventListener("click", () => importFile.click())
 
-// Initialize (migrating first, in case the background hasn't yet)
-migrate().catch(error => console.error("Migration failed:", error)).finally(init)
+importFile.addEventListener("change", async () => {
+  const file = importFile.files?.[0]
+  importFile.value = ""
+  if (!file) {
+    return
+  }
+  try {
+    let data: unknown
+    try {
+      data = JSON.parse(await file.text())
+    } catch {
+      setStatus(backupStatus, "This file is not a Focus Guard backup", true)
+      return
+    }
+    const { profiles, skippedDomains } = parseBackup(data)
+    const domains = Object.values(profiles).reduce((sum, profile) => sum + profile.domains.length, 0)
+    if (!confirm(`Import ${count(Object.keys(profiles).length, "profile")} with ${count(domains, "domain")}? Existing profiles are kept; new domains are added to them.`)) {
+      return
+    }
+    const result = await importProfiles(profiles)
+    await view.refresh()
+    const skipped = skippedDomains > 0 ? ` (skipped ${count(skippedDomains, "invalid entry", "invalid entries")})` : ""
+    setStatus(backupStatus, `Imported ${count(result.profilesAdded, "new profile")} and ${count(result.domainsAdded, "new domain")}${skipped}`)
+  } catch (error) {
+    console.error("Import failed:", error)
+    setStatus(backupStatus, userMessage(error), true)
+  }
+})
+
+// Start ---------------------------------------------------------------------
+
+setUpTabs(byId("tab-domains").parentElement!)
+
+// Migrate first, in case the background hasn't yet
+migrate()
+  .catch(error => console.error("Migration failed:", error))
+  .finally(() => Promise.all([view.refresh(), showImage()]))

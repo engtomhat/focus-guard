@@ -155,6 +155,108 @@ export async function resetAll(): Promise<void> {
 }
 
 // ---------------------------------------------------------------------------
+// Backup (export/import as a JSON file)
+
+export const BACKUP_FORMAT = "focus-guard-backup"
+export const BACKUP_VERSION = 1
+
+export interface Backup {
+  format: typeof BACKUP_FORMAT
+  version: typeof BACKUP_VERSION
+  exportedAt: string
+  profiles: Profiles
+}
+
+export async function exportBackup(): Promise<Backup> {
+  return {
+    format: BACKUP_FORMAT,
+    version: BACKUP_VERSION,
+    exportedAt: new Date().toISOString(),
+    profiles: await getProfiles(),
+  }
+}
+
+/**
+ * Validate a parsed backup file. Domains are normalized; invalid ones are
+ * dropped and counted rather than failing the whole import.
+ */
+export function parseBackup(data: unknown): { profiles: Profiles; skippedDomains: number } {
+  const backup = data as Partial<Backup> | null
+  if (!backup || backup.format !== BACKUP_FORMAT || typeof backup.profiles !== "object" || !backup.profiles) {
+    throw new UserError("This file is not a Focus Guard backup")
+  }
+  if (typeof backup.version !== "number" || backup.version > BACKUP_VERSION) {
+    throw new UserError("This backup was made by a newer version of Focus Guard. Update the extension and try again.")
+  }
+
+  const profiles: Profiles = {}
+  let skippedDomains = 0
+  for (const [id, raw] of Object.entries(backup.profiles as Record<string, unknown>)) {
+    const candidate = raw as Partial<Profile> | null
+    if (!candidate || typeof candidate.name !== "string" || !candidate.name.trim() || !Array.isArray(candidate.domains)) {
+      throw new UserError("This backup file is damaged (a profile is missing its name or domains)")
+    }
+    const domains: string[] = []
+    for (const entry of candidate.domains) {
+      const normalized = typeof entry === "string" ? normalizeDomain(entry) : null
+      if (normalized?.ok) {
+        if (!domains.includes(normalized.domain)) {
+          domains.push(normalized.domain)
+        }
+      } else {
+        skippedDomains++
+      }
+    }
+    profiles[id] = { name: candidate.name.trim(), domains, createdAt: candidate.createdAt }
+  }
+  return { profiles, skippedDomains }
+}
+
+/**
+ * Add a backup's profiles to the current ones. Never removes anything: a profile
+ * matching an existing one (same id, or same name ignoring case) gets the new
+ * domains added; other profiles are created.
+ */
+export async function importProfiles(imported: Profiles): Promise<{ profilesAdded: number; domainsAdded: number }> {
+  const current = await getProfiles()
+  const next: Profiles = { ...current }
+  let profilesAdded = 0
+  let domainsAdded = 0
+
+  for (const [importedId, profile] of Object.entries(imported)) {
+    const sameName = Object.keys(next).find(id => next[id]!.name.trim().toLowerCase() === profile.name.toLowerCase())
+    const targetId = Object.hasOwn(next, importedId) ? importedId : sameName
+    if (targetId) {
+      const existing = next[targetId]!
+      const added = profile.domains.filter(domain => !findCoveringDomain(domain, existing.domains))
+      if (added.length > 0) {
+        next[targetId] = { ...existing, domains: [...existing.domains, ...added] }
+        domainsAdded += added.length
+      }
+    } else {
+      next[importedId === DEFAULT_PROFILE_ID ? DEFAULT_PROFILE_ID : newProfileId()] = createProfile(profile.name, profile.domains)
+      profilesAdded++
+      domainsAdded += profile.domains.length
+    }
+  }
+
+  const writes: Record<string, unknown> = {}
+  for (const [id, profile] of Object.entries(next)) {
+    if (profile !== current[id]) {
+      const key = profileKey(id)
+      if (syncItemBytes(key, profile) > SYNC_ITEM_QUOTA_BYTES) {
+        throw new UserError(`Importing would make the "${profile.name}" profile too large. Nothing was imported.`)
+      }
+      writes[key] = profile
+    }
+  }
+  if (Object.keys(writes).length > 0) {
+    await browser.storage.sync.set({ ...writes, ...legacyItems(next) })
+  }
+  return { profilesAdded, domainsAdded }
+}
+
+// ---------------------------------------------------------------------------
 // Active profile (device-local)
 
 export async function getActiveProfileId(): Promise<string | undefined> {

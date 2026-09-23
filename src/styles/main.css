@@ -1,15 +1,46 @@
 /* Base styles */
 :root {
-  --primary: #4caf50;
-  --primary-hover: #45a049;
-  --danger: #f44336;
-  --danger-hover: #d32f2f;
+  color-scheme: light dark;
+  /* Darker green/red than before so white button text meets WCAG AA contrast (4.5:1) */
+  --primary: #2e7d32;
+  --primary-hover: #1b5e20;
+  --primary-tint: rgba(46, 125, 50, 0.12);
+  /* Green used for text on the page background */
+  --primary-text: #2e7d32;
+  --danger: #c62828;
+  --danger-hover: #b71c1c;
+  --disabled: #bdbdbd;
+  --focus: #1565c0;
   --text: #333;
-  --text-light: #666;
+  --text-light: #595959;
   --border: #e0e0e0;
   --background: #fff;
   --background-alt: #f9f9f9;
   --shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --primary-tint: rgba(102, 187, 106, 0.16);
+    --primary-text: #81c784;
+    --disabled: #555;
+    --focus: #90caf9;
+    --text: #e6e6e6;
+    --text-light: #b0b0b0;
+    --border: #3a3a3a;
+    --background: #1e1e1e;
+    --background-alt: #121212;
+    --shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+  }
+}
+
+[hidden] {
+  display: none !important;
+}
+
+:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
 }
 
 * {
@@ -68,7 +99,7 @@ p {
 .blocked-title {
   font-size: 32px;
   margin-bottom: 16px;
-  color: var(--primary);
+  color: var(--primary-text);
   text-align: center;
 }
 
@@ -219,7 +250,7 @@ p {
 #domainInput:focus {
   outline: none;
   border-color: var(--primary);
-  box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+  box-shadow: 0 0 0 2px var(--primary-tint);
 }
 
 button {
@@ -250,12 +281,12 @@ button:active {
 }
 
 .danger-button.disabled {
-  background: #ccc;
+  background: var(--disabled);
   cursor: not-allowed;
 }
 
 .danger-button.disabled:hover {
-  background: #ccc;
+  background: var(--disabled);
 }
 
 .remove-btn {
@@ -278,7 +309,7 @@ button:active {
 
 .secondary-button {
   background: transparent;
-  color: var(--primary);
+  color: var(--primary-text);
   border: 1px solid var(--primary);
   width: 100%;
   font-weight: 500;
@@ -287,7 +318,7 @@ button:active {
 }
 
 .secondary-button:hover {
-  background: rgba(76, 175, 80, 0.1);
+  background: var(--primary-tint);
 }
 
 /* Manager link */
@@ -298,7 +329,7 @@ button:active {
 }
 
 .manager-link a {
-  color: var(--primary);
+  color: var(--primary-text);
   text-decoration: none;
   font-weight: 500;
   display: inline-flex;
@@ -352,6 +383,7 @@ button:active {
 
 .image-upload-label {
   display: inline-block;
+  font: inherit;
   padding: 10px 16px;
   border-radius: 6px;
   cursor: pointer;
@@ -502,7 +534,7 @@ button:active {
 
 .active-profile-section h2 {
   margin-bottom: 12px;
-  color: var(--primary);
+  color: var(--primary-text);
 }
 
 /* Tab navigation */
@@ -533,7 +565,7 @@ button:active {
 }
 
 .tab-btn.active {
-  color: var(--primary);
+  color: var(--primary-text);
   border-bottom-color: var(--primary);
   background: var(--background-alt);
 }
@@ -596,4 +628,47 @@ button:active {
     border-left-color: var(--primary);
     border-bottom-color: transparent;
   }
+}
+/* Status messages (image upload, backup, copy) */
+.status-message {
+  min-height: 1.5em;
+  margin: 8px 0;
+  color: var(--text-light);
+  font-size: 14px;
+}
+
+.status-message.error,
+.copy-status.error {
+  color: var(--danger);
+}
+
+.copy-status {
+  min-width: 90px;
+  color: var(--primary-text);
+  font-size: 14px;
+  text-align: left;
+}
+
+@media (prefers-color-scheme: dark) {
+  .status-message.error,
+  .copy-status.error {
+    color: #ef9a9a;
+  }
+}
+
+.empty-state {
+  color: var(--text-light);
+  font-style: italic;
+  justify-content: center;
+}
+
+.backup-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.backup-actions .secondary-button {
+  width: auto;
+  flex: 1;
 }
