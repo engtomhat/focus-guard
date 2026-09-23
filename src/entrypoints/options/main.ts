@@ -1,8 +1,22 @@
-import { profiles } from "@/lib/core/profiles"
-import { domains } from "@/lib/core/domains"
-import { images } from "@/lib/core/images"
+import { DEFAULT_PROFILE_ID, resolveActiveProfileId } from "@/lib/core/profiles"
 import type { Profiles } from "@/lib/core/types"
-import { byId, errorMessage, showInputError } from "@/lib/ui/dom"
+import { images } from "@/lib/images"
+import { migrate } from "@/lib/migration"
+import {
+  addDomain as storeAddDomain,
+  addProfile as storeAddProfile,
+  ensureProfiles,
+  getActiveProfileId,
+  loadImage as storeLoadImage,
+  onProfilesChanged,
+  removeDomain as storeRemoveDomain,
+  removeProfile,
+  resetAll,
+  resetImage,
+  saveImage,
+  setActiveProfileId,
+} from "@/lib/storage"
+import { byId, showInputError, userMessage } from "@/lib/ui/dom"
 
 // DOM elements
 const domainInput = byId<HTMLInputElement>("domainInput")
@@ -34,9 +48,8 @@ async function refreshProfiles() {
 }
 
 async function loadProfiles() {
-  const result = await profiles.getAll()
-  profilesData = result.profiles
-  activeProfile = result.activeProfile
+  profilesData = await ensureProfiles()
+  activeProfile = resolveActiveProfileId(await getActiveProfileId(), profilesData) ?? DEFAULT_PROFILE_ID
 }
 
 // Load profiles and populate selector
@@ -99,22 +112,21 @@ function displayDomains() {
 
 // Load current image
 async function loadImage() {
-  imagePreview.src = await images.loadImage()
+  imagePreview.src = await storeLoadImage()
 }
 
 // Add domain to current profile
 async function addDomain() {
-  const domain = domainInput.value.trim()
-  if (domain && !profilesData[activeProfile]?.domains.includes(domain)) {
-    // Add domain to active profile if it doesn't already exist
-    try {
-      await domains.addDomain(activeProfile, domain)
-      await refreshProfiles()
-      domainInput.value = ""
-    } catch (error) {
-      console.error("Error adding domain:", error)
-      showInputError(domainInput, `Could not save: ${errorMessage(error)}`)
-    }
+  if (!domainInput.value.trim()) {
+    return
+  }
+  try {
+    await storeAddDomain(activeProfile, domainInput.value)
+    domainInput.value = ""
+    await refreshProfiles()
+  } catch (error) {
+    console.error("Error adding domain:", error)
+    showInputError(domainInput, userMessage(error))
   }
 }
 
@@ -124,8 +136,7 @@ async function resetSettings() {
   }
 
   try {
-    await profiles.reset()
-    await images.resetImage()
+    await resetAll()
     await init()
   } catch (error) {
     console.error("Error resetting settings:", error)
@@ -136,7 +147,7 @@ async function resetSettings() {
 async function removeDomain(domain: string | undefined) {
   if (domain) {
     try {
-      await domains.removeDomain(activeProfile, domain)
+      await storeRemoveDomain(activeProfile, domain)
       await refreshProfiles()
     } catch (error) {
       console.error("Error removing domain:", error)
@@ -146,23 +157,22 @@ async function removeDomain(domain: string | undefined) {
 
 // Add new profile
 async function addProfile() {
-  const profileName = profileNameInput.value.trim()
-
-  if (profileName && !profilesData[profileName]) {
-    try {
-      const profileId = await profiles.addProfile(profileName)
-      // Reset input field
-      profileNameInput.value = ""
-      // Switch to new profile
-      await switchProfile(profileId)
-    } catch (error) {
-      console.error("Error adding profile:", error)
-    }
+  if (!profileNameInput.value.trim()) {
+    return
+  }
+  try {
+    const profileId = await storeAddProfile(profileNameInput.value)
+    profileNameInput.value = ""
+    // Switch to new profile
+    await switchProfile(profileId)
+  } catch (error) {
+    console.error("Error adding profile:", error)
+    showInputError(profileNameInput, userMessage(error))
   }
 }
 
 function isDefaultSelected() {
-  return profileSelector.value === "default"
+  return profileSelector.value === DEFAULT_PROFILE_ID
 }
 
 // Delete current profile
@@ -172,7 +182,7 @@ async function deleteProfile() {
   // Don't allow deleting the last profile
   const profileCount = Object.keys(profilesData).length
 
-  if (selectedProfile === "default" || profileCount <= 1) {
+  if (selectedProfile === DEFAULT_PROFILE_ID || profileCount <= 1) {
     // Don't delete the default profile, the last profile, or non-existent profile
     return
   }
@@ -183,14 +193,8 @@ async function deleteProfile() {
   }
 
   try {
-    // Remove the profile
-    await profiles.removeProfile(selectedProfile)
-
-    // Switch to first remaining profile
-    const firstProfileId = Object.keys(profilesData)[0]
-    if (firstProfileId) {
-      await switchProfile(firstProfileId)
-    }
+    // Removing the active profile switches this device back to Default
+    await removeProfile(selectedProfile)
     await refreshProfiles()
   } catch (error) {
     console.error("Error deleting profile:", error)
@@ -204,7 +208,7 @@ async function switchProfileToSelected() {
 
 async function switchProfile(profileId: string) {
   try {
-    await profiles.switchProfile(profileId)
+    await setActiveProfileId(profileId)
     await refreshProfiles()
   } catch (error) {
     console.error("Error switching profile:", error)
@@ -249,7 +253,7 @@ imageUpload.addEventListener("change", () => {
       try {
         // Compress and save image using images module
         const compressed = await images.compressImage(reader.result as string, 0.7)
-        await images.saveImage(compressed)
+        await saveImage(compressed)
         // Load the image using the manager's loadImage function
         await loadImage()
       } catch (error) {
@@ -264,7 +268,7 @@ imageUpload.addEventListener("change", () => {
 // Reset image to default
 resetImageBtn.addEventListener("click", async () => {
   try {
-    await images.resetImage()
+    await resetImage()
     await loadImage()
   } catch (error) {
     console.error("Failed to reset image:", error)
@@ -290,5 +294,8 @@ tabBtns.forEach((btn) => {
   })
 })
 
-// Initialize
-init()
+// Changes from the popup or another device
+onProfilesChanged(() => { refreshProfiles() })
+
+// Initialize (migrating first, in case the background hasn't yet)
+migrate().catch(error => console.error("Migration failed:", error)).finally(init)

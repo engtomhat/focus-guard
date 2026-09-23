@@ -1,47 +1,56 @@
-import { beforeEach, describe, expect, it } from 'vitest';
-import { fakeBrowser } from 'wxt/testing/fake-browser';
-import { profiles } from '@/lib/core/profiles';
-import type { Profiles } from '@/lib/core/types';
+import { describe, expect, it } from 'vitest';
+import { mergeProfiles, newProfileId, resolveActiveProfileId, validateProfileName } from '@/lib/core/profiles';
 
-const syncData = () => fakeBrowser.storage.sync.get(null);
+const profiles = {
+  default: { name: 'Default', domains: [] },
+  profile_a: { name: 'Work', domains: ['a.com'] },
+};
 
-beforeEach(() => {
-  fakeBrowser.reset();
-});
-
-describe('profiles.migrateLegacyIfPresent', () => {
-  it('does not write anything when there is no data (fresh or not-yet-synced device)', async () => {
-    await profiles.migrateLegacyIfPresent();
-    expect(await syncData()).toEqual({});
+describe('validateProfileName', () => {
+  it('accepts a new name', () => {
+    expect(validateProfileName('Evening', profiles)).toBeNull();
   });
 
-  it('leaves existing profiles untouched', async () => {
-    const existing = { profiles: { work: { name: 'Work', domains: ['a.com'] } }, activeProfile: 'work' };
-    await fakeBrowser.storage.sync.set(existing);
-    await profiles.migrateLegacyIfPresent();
-    expect(await syncData()).toEqual(existing);
+  it('rejects empty, too long and duplicate names (case-insensitive)', () => {
+    expect(validateProfileName('   ', profiles)).toMatch(/Enter/);
+    expect(validateProfileName('x'.repeat(41), profiles)).toMatch(/at most/);
+    expect(validateProfileName(' work ', profiles)).toMatch(/already exists/);
+    expect(validateProfileName('DEFAULT', profiles)).toMatch(/already exists/);
   });
 
-  it('migrates legacy blockedDomains into the default profile', async () => {
-    await fakeBrowser.storage.sync.set({ blockedDomains: ['a.com', 'b.com'] });
-    await profiles.migrateLegacyIfPresent();
-    const data = await syncData();
-    expect((data.profiles as Profiles).default?.domains).toEqual(['a.com', 'b.com']);
-    expect(data.activeProfile).toBe('default');
-    expect(data).not.toHaveProperty('blockedDomains');
+  it('accepts names that collide with object built-ins', () => {
+    expect(validateProfileName('constructor', profiles)).toBeNull();
+    expect(validateProfileName('__proto__', profiles)).toBeNull();
   });
 });
 
-describe('profiles.getAll', () => {
-  it('creates the default profile when none exist', async () => {
-    const result = await profiles.getAll();
-    expect(Object.keys(result.profiles)).toEqual(['default']);
-    expect(result.activeProfile).toBe('default');
+describe('resolveActiveProfileId', () => {
+  it('uses the active profile if it exists', () => {
+    expect(resolveActiveProfileId('profile_a', profiles)).toBe('profile_a');
   });
 
-  it('repairs an active profile that points at a missing profile', async () => {
-    await fakeBrowser.storage.sync.set({ profiles: { work: { name: 'Work', domains: [] } }, activeProfile: 'gone' });
-    const result = await profiles.getAll();
-    expect(result.activeProfile).toBe('work');
+  it('falls back to Default, then to any profile', () => {
+    expect(resolveActiveProfileId('deleted', profiles)).toBe('default');
+    expect(resolveActiveProfileId(undefined, profiles)).toBe('default');
+    expect(resolveActiveProfileId('deleted', { profile_a: profiles.profile_a })).toBe('profile_a');
+    expect(resolveActiveProfileId('default', {})).toBeUndefined();
+  });
+
+  it('does not treat inherited object keys as profiles', () => {
+    expect(resolveActiveProfileId('toString', { profile_a: profiles.profile_a })).toBe('profile_a');
+  });
+});
+
+describe('newProfileId', () => {
+  it('is unique', () => {
+    const ids = new Set(Array.from({ length: 100 }, newProfileId));
+    expect(ids.size).toBe(100);
+  });
+});
+
+describe('mergeProfiles', () => {
+  it('keeps every domain from both versions, without duplicates', () => {
+    const merged = mergeProfiles({ name: 'A', domains: ['a.com', 'b.com'] }, { name: 'B', domains: ['b.com', 'c.com'] });
+    expect(merged).toEqual({ name: 'A', domains: ['a.com', 'b.com', 'c.com'] });
   });
 });

@@ -1,60 +1,42 @@
+import { browser } from "wxt/browser"
 import { defineBackground } from "wxt/utils/define-background"
-import { profiles } from "@/lib/core/profiles"
-import { domains } from "@/lib/core/domains"
-import type { Profile } from "@/lib/core/types"
-import { webNavigation, runtime } from "@/lib/browser/adapter"
+import { handleNavigation, recheckOpenTabs } from "@/lib/blocker"
+import { migrate } from "@/lib/migration"
+import { onProfilesChanged } from "@/lib/storage"
 
-const DEFAULT_PROFILE_ID = "default"
-
-// Resolve the active profile from storage on every navigation.
-// The background can be stopped and restarted at any time (MV3 service worker
-// in Chrome, event page in Firefox), so module-level state is not reliable.
-async function getActiveProfile(): Promise<Profile | null> {
-  const profilesData = await profiles.getProfiles()
-  if (!profilesData) {
-    return null
+async function runMigration() {
+  try {
+    const result = await migrate()
+    if (result !== "up-to-date") {
+      console.log("[Background] Migration:", result)
+    }
+  } catch (error) {
+    // Nothing is marked done on failure; the next wake retries
+    console.error("[Background] Migration failed:", error)
   }
+}
 
-  const activeProfileId = await profiles.getActiveProfileId()
-  const profileId = [activeProfileId, DEFAULT_PROFILE_ID, ...Object.keys(profilesData)]
-    .find(id => id && profilesData[id])
-  return profileId ? profilesData[profileId] ?? null : null
+function recheck() {
+  recheckOpenTabs().catch(error => console.error("[Background] Recheck failed:", error))
 }
 
 export default defineBackground(() => {
-  webNavigation.onBeforeNavigate.addListener(
-    async (details) => {
-      // Only top-level navigations. A blocked domain embedded in an iframe
-      // must not take over the whole tab.
-      if (details.frameId !== 0) {
-        return
-      }
+  // Listeners must be registered synchronously so that events wake the background
 
-      try {
-        const activeProfile = await getActiveProfile()
-        if (!activeProfile) {
-          return
-        }
+  browser.webNavigation.onBeforeNavigate.addListener(handleNavigation, {
+    url: [{ schemes: ["http", "https"] }],
+  })
 
-        const url = new URL(details.url)
-        if (domains.matches(url.hostname, activeProfile.domains || [])) {
-          console.log("[Background] Blocking domain:", url.hostname)
-          const activeProfileName = activeProfile.name || "Default"
+  // Blocklist or active profile changed (here or synced from another device)
+  onProfilesChanged(recheck)
 
-          await webNavigation.tabs.update(details.tabId, {
-            url: runtime.getURL(
-              `/blocked.html?url=${encodeURIComponent(details.url)}&profile=${encodeURIComponent(activeProfileName)}`
-            )
-          })
-        }
-      } catch (error) {
-        console.error("[Background] Block check failed:", error)
-      }
-    },
-    { url: [{ schemes: ["http", "https"] }] },
-  )
+  browser.runtime.onInstalled.addListener(async () => {
+    await runMigration()
+    recheck()
+  })
 
-  // Initialize: migrate legacy (pre-1.6) data if present. Do not create a default
-  // profile here; the popup and options page create it when first opened.
-  profiles.migrateLegacyIfPresent().catch(error => console.error("[Background] Legacy migration failed:", error))
+  browser.runtime.onStartup.addListener(runMigration)
+
+  // Also on every wake, in case an earlier attempt found no data yet or failed
+  runMigration()
 })

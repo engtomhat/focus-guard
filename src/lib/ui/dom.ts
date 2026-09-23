@@ -1,3 +1,5 @@
+import { UserError } from "../storage"
+
 // Small DOM helpers shared by the extension pages
 
 /** getElementById that fails loudly if the page markup is missing the element */
@@ -16,6 +18,11 @@ export function showInputError(input: HTMLInputElement, message: string): void {
   input.addEventListener("input", () => input.setCustomValidity(""), { once: true })
 }
 
-export function errorMessage(error: unknown): string {
-  return error instanceof Error ? error.message : String(error)
+/** The message to show for a failed action: our own validation messages as-is, anything else generic */
+export function userMessage(error: unknown): string {
+  if (error instanceof UserError) {
+    return error.message
+  }
+  const detail = error instanceof Error ? error.message : String(error)
+  return `Could not save: ${detail}`
 }

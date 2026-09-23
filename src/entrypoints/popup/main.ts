@@ -1,8 +1,16 @@
-import { profiles } from "@/lib/core/profiles"
-import { domains } from "@/lib/core/domains"
+import { browser } from "wxt/browser"
+import { resolveActiveProfileId } from "@/lib/core/profiles"
 import type { Profiles } from "@/lib/core/types"
-import { runtime } from "@/lib/browser/adapter"
-import { byId, errorMessage, showInputError } from "@/lib/ui/dom"
+import { migrate } from "@/lib/migration"
+import {
+  addDomain as storeAddDomain,
+  ensureProfiles,
+  getActiveProfileId,
+  onProfilesChanged,
+  removeDomain as storeRemoveDomain,
+  setActiveProfileId,
+} from "@/lib/storage"
+import { byId, showInputError, userMessage } from "@/lib/ui/dom"
 
 let activeProfile = "default"
 let profilesData: Profiles = {}
@@ -15,9 +23,8 @@ async function init() {
 }
 
 async function loadProfiles() {
-  const result = await profiles.getAll()
-  profilesData = result.profiles
-  activeProfile = result.activeProfile
+  profilesData = await ensureProfiles()
+  activeProfile = resolveActiveProfileId(await getActiveProfileId(), profilesData) ?? "default"
 }
 
 function displayProfiles() {
@@ -68,6 +75,7 @@ function displayDomains() {
       button.className = "remove-btn"
       button.textContent = "-"
       button.dataset.domain = domain
+      button.setAttribute("aria-label", `Remove ${domain}`)
 
       li.append(span, button)
       domainList.appendChild(li)
@@ -78,17 +86,16 @@ function displayDomains() {
 // Add new domain to active profile
 async function addDomain() {
   const domainInput = byId<HTMLInputElement>("domainInput")
-  const domain = domainInput.value.trim()
-  if (domain && !profilesData[activeProfile]?.domains.includes(domain)) {
-    // Add domain to active profile if it doesn't already exist
-    try {
-      await domains.addDomain(activeProfile, domain)
-      await init()
-      domainInput.value = ""
-    } catch (error) {
-      console.error("Error adding domain:", error)
-      showInputError(domainInput, `Could not save: ${errorMessage(error)}`)
-    }
+  if (!domainInput.value.trim()) {
+    return
+  }
+  try {
+    await storeAddDomain(activeProfile, domainInput.value)
+    domainInput.value = ""
+    await init()
+  } catch (error) {
+    console.error("Error adding domain:", error)
+    showInputError(domainInput, userMessage(error))
   }
 }
 
@@ -96,7 +103,7 @@ async function addDomain() {
 async function removeDomain(domain: string | undefined) {
   if (domain) {
     try {
-      await domains.removeDomain(activeProfile, domain)
+      await storeRemoveDomain(activeProfile, domain)
       await init()
     } catch (error) {
       console.error("Error removing domain:", error)
@@ -106,10 +113,8 @@ async function removeDomain(domain: string | undefined) {
 
 // Switch active profile
 async function switchProfile() {
-  const selectedProfile = byId<HTMLSelectElement>("profileSelector").value
-
   try {
-    await profiles.switchProfile(selectedProfile)
+    await setActiveProfileId(byId<HTMLSelectElement>("profileSelector").value)
     await init()
   } catch (error) {
     console.error("Error switching profile:", error)
@@ -135,8 +140,11 @@ document.addEventListener("click", (e) => {
 byId("profileSelector").addEventListener("change", switchProfile)
 
 byId("openManager").addEventListener("click", () => {
-  runtime.openOptionsPage()
+  browser.runtime.openOptionsPage()
 })
 
-// Initialize
-init()
+// Changes from the options page or another device
+onProfilesChanged(() => { init() })
+
+// Initialize (migrating first, in case the background hasn't yet)
+migrate().catch(error => console.error("Migration failed:", error)).finally(init)

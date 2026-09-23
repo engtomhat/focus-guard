@@ -1,30 +1,6 @@
-import { localStorage } from "../browser/adapter"
+// Image processing for the custom blocked-page image (needs a DOM: pages only, not the background)
 
 export const images = {
-    DEFAULT_IMAGE_PATH: "/images/default-blocked.png",
-    BLOCKED_IMAGE_KEY: "blockedImage",
-    
-    // Load current image
-    async loadImage(): Promise<string> {
-        const { blockedImage } = await localStorage.get([images.BLOCKED_IMAGE_KEY])
-        return (blockedImage as string | undefined) || images.DEFAULT_IMAGE_PATH
-    },
-
-    // Save image to storage
-    async saveImage(dataUrl: string): Promise<void> {
-        await localStorage.set({ [images.BLOCKED_IMAGE_KEY]: dataUrl })
-    },
-
-    // Get current image data
-    async getCurrentImage(): Promise<string> {
-        return await this.loadImage()
-    },
-
-    // Reset image to default
-    async resetImage(): Promise<void> {
-        await localStorage.remove([images.BLOCKED_IMAGE_KEY])
-    },
-
     // Compress image with quality optimization
     async compressImage(dataUrl: string, quality = 0.7): Promise<string> {
         return new Promise((resolve, reject) => {
