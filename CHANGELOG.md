@@ -3,23 +3,35 @@
 All notable changes to this project will be documented in this file.
 ## [3.0.0](https://github.com/engtomhat/focus-guard/compare/v2.2.1...v3.0.0) (2026-09-23)
 
+A rebuilt Focus Guard: smarter blocking, per-device profiles, backups, dark mode, and a privacy guarantee that is now enforced by tests.
 
 ### ⚠ BREAKING CHANGES
 
-* the storage layout changes to per-profile sync keys with a device-local active profile. Existing 2.x data is migrated automatically; edits made on a device still running 2.x after another device has migrated are not picked up.
+* **Profiles are stored in a new way, and the active profile is now chosen per device.** Your 2.x profiles and blocked domains are moved over automatically when the extension updates. A device still running 2.x keeps working, but changes made there after another device has updated won't be picked up.
+* **Firefox 140 or later is required** (Firefox for Android 142), matching the "collects no data" declaration that Firefox Add-ons requires. Older Firefox versions keep 2.2.1. ([#62](https://github.com/engtomhat/focus-guard/pull/62))
 
 ### Features
 
-* per-profile storage, device-local active profile, domain normalization, open-tab recheck ([aee628f](https://github.com/engtomhat/focus-guard/commit/aee628f9b9d7f1b67ef98a896f6d3578fcf17544)), closes [#49](https://github.com/engtomhat/focus-guard/issues/49)
-* shared profile view, image pipeline, backup export/import, accessibility and dark mode ([e4b70bb](https://github.com/engtomhat/focus-guard/commit/e4b70bb4e7047020719b6970f19c6dc6f8bd61ce))
-* shared profile view, image pipeline, backup export/import, accessibility and dark mode ([a294dca](https://github.com/engtomhat/focus-guard/commit/a294dcac7a7a87dd32f2e80990c370a9a11b8c90)), closes [#50](https://github.com/engtomhat/focus-guard/issues/50)
-* strict CSP, no-network and permission guards, end-to-end tests in CI ([0a74291](https://github.com/engtomhat/focus-guard/commit/0a74291d6f59d66ea21ec4b48fe94e116d946a52))
-* strict CSP, no-network and permission guards, end-to-end tests in CI ([50fe3b4](https://github.com/engtomhat/focus-guard/commit/50fe3b4bc5d42c39312c58ca8bdb8998678bae0b)), closes [#51](https://github.com/engtomhat/focus-guard/issues/51)
-
+* **Open tabs are blocked too:** adding a site, or switching profile, immediately blocks tabs that are already on it ([#56](https://github.com/engtomhat/focus-guard/pull/56))
+* **Type domains any way you like:** `https://www.Example.com/page`, `*.example.com`, capitals and international domain names are cleaned up automatically; invalid entries and domains that are already blocked are explained ([#56](https://github.com/engtomhat/focus-guard/pull/56))
+* **More room per profile:** each profile has its own storage space (about 300 domains) instead of all profiles sharing one; a full profile is reported instead of failing silently ([#56](https://github.com/engtomhat/focus-guard/pull/56))
+* **Per-device active profile:** switching to "Work" on your laptop no longer switches your other computers; profile names are unique regardless of case ([#56](https://github.com/engtomhat/focus-guard/pull/56))
+* **Backup:** export your profiles to a file and import them again, for example in another browser; importing only ever adds ([#58](https://github.com/engtomhat/focus-guard/pull/58))
+* **Better custom images:** resized to at most 1920px, transparency kept, clear messages for unsupported files ([#58](https://github.com/engtomhat/focus-guard/pull/58))
+* **Dark mode and accessibility:** follows your system's dark mode; keyboard-friendly manager tabs and buttons, labelled controls, visible focus and higher-contrast colors ([#58](https://github.com/engtomhat/focus-guard/pull/58))
+* **The manager is now also the extension's options page** ([#54](https://github.com/engtomhat/focus-guard/pull/54))
+* **Privacy, enforced:** a strict Content Security Policy blocks any network access from the extension's pages, and automated tests fail if any network code or new permission is added ([#59](https://github.com/engtomhat/focus-guard/pull/59), [privacy policy](PRIVACY.md))
 
 ### Bug Fixes
 
-* require Firefox 140 (Android 142) to match the data collection declaration ([#62](https://github.com/engtomhat/focus-guard/issues/62)) ([54f217f](https://github.com/engtomhat/focus-guard/commit/54f217f4e1e891306639a472d875fd480c2fe55e))
+* Double-clicking "copy" on the blocked page no longer replaces the blocked URL with "Link Copied!" ([#58](https://github.com/engtomhat/focus-guard/pull/58))
+* Addresses ending in a dot (`facebook.com.`) no longer get around a block ([#56](https://github.com/engtomhat/focus-guard/pull/56))
+
+### Under the hood
+
+* Rebuilt with [WXT](https://wxt.dev) and TypeScript: one codebase and config for Chrome and Firefox ([#54](https://github.com/engtomhat/focus-guard/pull/54))
+* Every change is checked by 170 automated tests, including end-to-end tests in real Chrome and Firefox and an upgrade test from 2.2.1 ([#59](https://github.com/engtomhat/focus-guard/pull/59))
+* Releases are automated; see [RELEASING.md](RELEASING.md) ([#54](https://github.com/engtomhat/focus-guard/pull/54), [#60](https://github.com/engtomhat/focus-guard/pull/60))
 
 ## [2.2.1] - 2026-09-23
 ### Fixed
