@@ -51,8 +51,14 @@ export default defineConfig({
           gecko: {
             // Tied to the AMO listing: never change
             id: 'focusguard@example.com',
-            strict_min_version: '112.0',
+            // 140 is the first version that supports data_collection_permissions
+            // (required by AMO); also the current Extended Support Release
+            strict_min_version: '140.0',
             data_collection_permissions: { required: ['none'] },
+          },
+          gecko_android: {
+            // First Firefox for Android version that supports data_collection_permissions
+            strict_min_version: '142.0',
           },
         },
       }),

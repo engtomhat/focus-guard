@@ -77,10 +77,12 @@ describe.each(['chrome', 'firefox'] as const)('%s production build', (browser) =
 
 describe('firefox-specific manifest', () => {
   it('keeps the published add-on id and settings', () => {
-    const gecko = builds.firefox.manifest.browser_specific_settings.gecko;
+    const { gecko, gecko_android } = builds.firefox.manifest.browser_specific_settings;
     expect(gecko.id).toBe('focusguard@example.com');
-    expect(gecko.strict_min_version).toBe('112.0');
     expect(gecko.data_collection_permissions).toEqual({ required: ['none'] });
+    // Must be at least the versions that support data_collection_permissions (AMO warns otherwise)
+    expect(gecko.strict_min_version).toBe('140.0');
+    expect(gecko_android.strict_min_version).toBe('142.0');
   });
 
   it('uses an event page background (Firefox has no service workers for extensions)', () => {
