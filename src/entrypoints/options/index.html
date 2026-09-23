@@ -43,9 +43,10 @@
           </div>
 
           <div class="add-domain">
-            <input type="text" id="domainInput" aria-label="Domain to block" placeholder="Enter domain to block (e.g., facebook.com)">
+            <input type="text" id="domainInput" aria-describedby="domainInput-error" aria-label="Domain to block" placeholder="Enter domain to block (e.g., facebook.com)">
             <button type="button" id="addDomain">Add Domain</button>
           </div>
+          <p id="domainInput-error" class="input-error" role="alert" hidden></p>
         </div>
       </section>
 
@@ -79,9 +80,10 @@
 
           <div class="profile-controls">
             <div class="add-profile">
-              <input type="text" id="profileNameInput" aria-label="New profile name" placeholder="New profile name (e.g., Work, Study)" maxlength="40">
+              <input type="text" id="profileNameInput" aria-describedby="profileNameInput-error" aria-label="New profile name" placeholder="New profile name (e.g., Work, Study)" maxlength="40">
               <button type="button" id="addProfile">Create Profile</button>
             </div>
+            <p id="profileNameInput-error" class="input-error" role="alert" hidden></p>
 
             <div class="profile-actions">
               <button type="button" id="deleteProfile" class="danger-button">Delete Current Profile</button>

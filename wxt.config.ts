@@ -56,10 +56,8 @@ export default defineConfig({
             strict_min_version: '140.0',
             data_collection_permissions: { required: ['none'] },
           },
-          gecko_android: {
-            // First Firefox for Android version that supports data_collection_permissions
-            strict_min_version: '142.0',
-          },
+          // No gecko_android: that key is what lists the add-on for Firefox for Android,
+          // which isn't supported yet (see issue #67)
         },
       }),
     };

@@ -22,9 +22,10 @@
       </div>
 
       <div class="add-domain">
-        <input type="text" id="domainInput" aria-label="Domain to block" placeholder="Enter domain to block (e.g., facebook.com)">
+        <input type="text" id="domainInput" aria-describedby="domainInput-error" aria-label="Domain to block" placeholder="Enter domain to block (e.g., facebook.com)">
         <button type="button" id="addDomain">Add</button>
       </div>
+      <p id="domainInput-error" class="input-error" role="alert" hidden></p>
     </div>
 
     <div class="manager-link">

@@ -1,4 +1,4 @@
-import { existsSync, readdirSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 
 const OUTPUT = resolve(import.meta.dirname, '../../../.output');
@@ -12,13 +12,17 @@ export function chromeBuild(): string {
   return dir;
 }
 
-/** Firefox zip (run `npm run zip` first) */
+/**
+ * Firefox zip of the current version (run `npm run zip` first). Matched by version
+ * because .output keeps zips of earlier versions, which would silently test old code.
+ */
 export function firefoxZip(): string {
-  const zip = existsSync(OUTPUT) ? readdirSync(OUTPUT).find(name => name.endsWith('-firefox.zip')) : undefined;
-  if (!zip) {
-    throw new Error(`No Firefox zip in ${OUTPUT}. Run "npm run zip" first.`);
+  const { version } = JSON.parse(readFileSync(resolve(OUTPUT, '../package.json'), 'utf8')) as { version: string };
+  const zip = join(OUTPUT, `focus-guard-${version}-firefox.zip`);
+  if (!existsSync(zip)) {
+    throw new Error(`No Firefox zip for version ${version} in ${OUTPUT}. Run "npm run zip" first.`);
   }
-  return join(OUTPUT, zip);
+  return zip;
 }
 
 /**
