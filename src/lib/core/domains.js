@@ -15,12 +15,16 @@ export const domains = {
     return profile.domains || []
   },
   
-  async isBlocked(urlHostname, profileId) {
-    const blockedDomains = await this.getBlockedList(profileId)
+  matches(urlHostname, blockedDomains) {
     return blockedDomains.some(blockedDomain => {
-      return urlHostname === blockedDomain || 
+      return urlHostname === blockedDomain ||
              urlHostname.endsWith(`.${blockedDomain}`)
     })
+  },
+
+  async isBlocked(urlHostname, profileId) {
+    const blockedDomains = await this.getBlockedList(profileId)
+    return this.matches(urlHostname, blockedDomains)
   },
 
   async addDomain(profileId, domain) {

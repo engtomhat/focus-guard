@@ -57,6 +57,10 @@ async function buildExtension(target) {
       path.join(__dirname, 'assets', 'images', 'default-blocked.png'),
       path.join(distDir, 'images', 'default-blocked.png')
     );
+    await fs.copyFile(
+      path.join(__dirname, 'bmc-logo.png'),
+      path.join(distDir, 'images', 'bmc-logo.png')
+    );
 
     // 5. Copy browser-specific icons
     const browserIcons = {

@@ -113,8 +113,8 @@ If Focus Guard helps you stay productive, consider supporting its development:
 Your support helps maintain and improve this extension!
 
 ## Privacy Notes
-🔍 Focus Guard is designed to block distracting websites, not tracking requests.  
-- Allows common tracking paths (e.g., `facebook.com/tr/`) to maintain site functionality
+- Focus Guard makes no network requests and uses no third-party services
+- Your profiles and blocked domains are stored in your browser, and synced only through your own browser account if browser sync is enabled
 - No user activity data is collected by the extension itself
 
 ## License
