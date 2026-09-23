@@ -20,6 +20,10 @@ export interface FirefoxExtension {
   openExtensionPage: (path: string) => Promise<void>;
   /** Run an async function body on an extension page; `args` is available inside */
   onExtensionPage: <T>(body: string, ...args: unknown[]) => Promise<T>;
+  /** Run one of the self-contained functions from support/ui.ts on the current page */
+  runInPage: <A, R>(fn: (arg: A) => R | Promise<R>, arg?: A) => Promise<R>;
+  /** Set a Firefox preference (e.g. to emulate dark mode) */
+  setPreference: (name: string, value: number) => Promise<void>;
   seed: (profiles: Profiles, activeProfile: string) => Promise<void>;
   storage: () => Promise<{ sync: Record<string, unknown>; local: Record<string, unknown> }>;
   visit: (url: string) => Promise<string>;
@@ -74,6 +78,19 @@ export async function launchFirefox(site: TestSite): Promise<FirefoxExtension> {
     install: async (xpi) => { await driver.installAddon(xpi, true); await sleep(500); },
     openExtensionPage,
     onExtensionPage,
+    runInPage: (fn, arg) => driver.executeAsyncScript(
+      `const [arg, done] = arguments;
+       Promise.resolve((${fn.toString()})(arg)).then(done, error => done({ error: String(error) }));`,
+      arg,
+    ),
+    setPreference: async (name, value) => {
+      await driver.setContext(firefox.Context.CHROME);
+      try {
+        await driver.executeScript('Services.prefs.setIntPref(arguments[0], arguments[1])', name, value);
+      } finally {
+        await driver.setContext(firefox.Context.CONTENT);
+      }
+    },
     seed: async (profiles, activeProfile) => {
       await onDataPage(`
         const [profiles, activeProfile] = args;
