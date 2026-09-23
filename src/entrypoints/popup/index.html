@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <link rel="stylesheet" href="../../styles/main.css">
@@ -7,29 +7,29 @@
   <script src="./main.ts" type="module"></script>
 </head>
 <body>
-  <div class="container">
+  <main class="container">
     <h1>Focus Guard</h1>
-    
-    <div id="profileSelectorContainer" class="profile-selector-container">
+
+    <div id="profileSelectorContainer" class="profile-selector-container" hidden>
       <label for="profileSelector">Active Profile:</label>
       <select id="profileSelector" class="profile-selector"></select>
     </div>
-    
+
     <div class="block-list">
       <h2>Blocked Domains</h2>
       <div class="domain-list">
-        <ul id="domainList"></ul>
+        <ul id="domainList" aria-label="Blocked domains"></ul>
       </div>
-      
+
       <div class="add-domain">
-        <input type="text" id="domainInput" placeholder="Enter domain to block (e.g., facebook.com)">
-        <button id="addDomain">Add</button>
+        <input type="text" id="domainInput" aria-label="Domain to block" placeholder="Enter domain to block (e.g., facebook.com)">
+        <button type="button" id="addDomain">Add</button>
       </div>
     </div>
-    
+
     <div class="manager-link">
-      <button id="openManager" class="secondary-button">Open Full Manager</button>
+      <button type="button" id="openManager" class="secondary-button">Open Full Manager</button>
     </div>
-  </div>
+  </main>
 </body>
 </html>

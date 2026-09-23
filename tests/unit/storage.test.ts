@@ -7,6 +7,9 @@ import {
   addDomain,
   addProfile,
   ensureProfiles,
+  exportBackup,
+  importProfiles,
+  parseBackup,
   getActiveProfile,
   getProfiles,
   onProfilesChanged,
@@ -167,5 +170,68 @@ describe('onProfilesChanged', () => {
     stop();
     await fakeBrowser.storage.sync.set({ 'profile:x': { name: 'X', domains: [] } });
     expect(callback).toHaveBeenCalledTimes(2);
+  });
+});
+
+describe('backup', () => {
+  const file = (profiles: unknown, extra: Record<string, unknown> = {}) =>
+    ({ format: 'focus-guard-backup', version: 1, exportedAt: '2026-09-23T00:00:00.000Z', profiles, ...extra });
+
+  it('round-trips: export, then import into an empty browser', async () => {
+    await ensureProfiles();
+    await addDomain('default', 'a.com');
+    const work = await addProfile('Work');
+    await addDomain(work, 'b.com');
+    const backup = await exportBackup();
+
+    fakeBrowser.reset();
+    await ensureProfiles();
+    const { profiles } = parseBackup(JSON.parse(JSON.stringify(backup)));
+    expect(await importProfiles(profiles)).toEqual({ profilesAdded: 1, domainsAdded: 2 });
+
+    const restored = Object.values(await getProfiles()).map(p => [p.name, p.domains]);
+    expect(restored).toEqual(expect.arrayContaining([['Default', ['a.com']], ['Work', ['b.com']]]));
+  });
+
+  it('normalizes domains and skips invalid ones', () => {
+    const { profiles, skippedDomains } = parseBackup(file({ x: { name: 'X', domains: ['HTTPS://A.com/x', 'not a domain', 42, 'a.com'] } }));
+    expect(profiles.x!.domains).toEqual(['a.com']);
+    expect(skippedDomains).toBe(2);
+  });
+
+  it('rejects files that are not backups, damaged or from a newer version', () => {
+    expect(() => parseBackup({ hello: 1 })).toThrow('not a Focus Guard backup');
+    expect(() => parseBackup(null)).toThrow('not a Focus Guard backup');
+    expect(() => parseBackup(file({ x: { domains: [] } }))).toThrow('damaged');
+    expect(() => parseBackup(file({}, { version: 2 }))).toThrow('newer version');
+  });
+
+  it('merges into existing profiles by id or name and never removes anything', async () => {
+    await ensureProfiles();
+    await addDomain('default', 'keep.com');
+    const work = await addProfile('Work');
+    await addDomain(work, 'reddit.com');
+
+    const { profiles } = parseBackup(file({
+      default: { name: 'Default', domains: ['keep.com', 'new.com'] },
+      profile_other_device: { name: 'work', domains: ['old.reddit.com', 'news.test'] },
+      profile_3: { name: 'Evening', domains: ['tv.test'] },
+    }));
+    expect(await importProfiles(profiles)).toEqual({ profilesAdded: 1, domainsAdded: 3 });
+
+    const after = await getProfiles();
+    expect(after.default!.domains).toEqual(['keep.com', 'new.com']);
+    // "old.reddit.com" is already covered by reddit.com, so only news.test is added
+    expect(after[work]!.domains).toEqual(['reddit.com', 'news.test']);
+    expect(Object.values(after).find(p => p.name === 'Evening')!.domains).toEqual(['tv.test']);
+  });
+
+  it('imports nothing if a profile would exceed the sync item limit', async () => {
+    await ensureProfiles();
+    const big = nearlyFullProfile('default', 'Default');
+    await fakeBrowser.storage.sync.set({ 'profile:default': big });
+    const { profiles } = parseBackup(file({ default: { name: 'Default', domains: ['one-more-quite-long-domain.example'] }, p2: { name: 'Other', domains: ['x.com'] } }));
+    await expect(importProfiles(profiles)).rejects.toThrow('Nothing was imported');
+    expect(Object.keys(await getProfiles())).toEqual(['default']);
   });
 });

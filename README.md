@@ -17,7 +17,9 @@
 
 ✅ **Domain Management**
 - Add/remove domains via popup or manager
-- Persistent storage of blocked domains
+- Type domains any way you like (`https://www.Example.com/page`, `*.example.com`); they're cleaned up automatically
+- Blocking a site also blocks tabs already open on it
+- Export/import your profiles to a file (backup, or moving to another browser)
 
 ✅ **Custom Block Page**
 - Shows original blocked URL
@@ -26,16 +28,20 @@
 
 ✅ **Image Management**
 - Upload custom blocked image
-- Automatic compression and resizing
-- Preview before saving
+- Automatic resizing (up to 1920px) and compression; transparency is kept
+- Preview of the current image in the manager
 
 ✅ **Cross-Browser Support**
 - Blocks distracting websites across multiple browsers
 
 ✅ **Profile Management**
 - Manage multiple blocklists
-- Switch between profiles
+- Switch between profiles (per device: switching on one computer doesn't switch the others)
 - Automatic migration from old storage format
+
+✅ **Accessibility**
+- Keyboard-friendly manager tabs and controls
+- Dark mode follows your system setting
 
 ## Architecture
 
