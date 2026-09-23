@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="assets/images/icons/icon128.png" width="128" alt="Focus Guard Logo">
+  <img src="public/images/icon128.png" width="128" alt="Focus Guard Logo">
   <h1>Focus Guard</h1>
   <p>Browser extension that protects your focus by intercepting distracting websites</p>
   
@@ -61,41 +61,46 @@ graph TD
 2. For Chrome:
    - Go to `chrome://extensions`
    - Enable "Developer mode"
-   - Drag & drop `focus-guard-chrome.zip`
+   - Unzip `focus-guard-<version>-chrome.zip` and click "Load unpacked"
 3. For Firefox:
    - Go to `about:debugging#/runtime/this-firefox`
    - Click "Load Temporary Add-on"
-   - Select `focus-guard-firefox.zip`
+   - Select `focus-guard-<version>-firefox.zip`
 
-### Development Build
+### Development
+Requires Node.js 22+ (CI and releases use the version in `.nvmrc`). Built with [WXT](https://wxt.dev) and TypeScript.
+
 ```bash
-# Clone repository
-git clone https://github.com/yourusername/focus-guard.git
+git clone https://github.com/engtomhat/focus-guard.git
 cd focus-guard
-
-# Install dependencies
 npm install
 
-# Build extensions
-npm run build chrome  # Chrome build
-npm run build firefox # Firefox build
+npm run dev           # Chrome with hot reload
+npm run dev:firefox   # Firefox with hot reload
 
-# Load in browser:
-# Chrome: Load unpacked from dist/chrome
-# Firefox: Load temporary add-on from dist/firefox
+npm run build         # Production builds in .output/chrome-mv3 and .output/firefox-mv3
+npm run zip           # Store-ready zips in .output/ (plus the Firefox sources zip)
+
+npm run lint          # ESLint
+npm run compile       # TypeScript typecheck
+npm test              # Unit tests + production build checks
 ```
+
+To load a build by hand: in Chrome, "Load unpacked" from `.output/chrome-mv3`; in Firefox, `about:debugging` → "Load Temporary Add-on" → any file in `.output/firefox-mv3`.
+
+Releases are automated; see [RELEASING.md](RELEASING.md).
 
 ### Key Features
 - 🚀 Background service-based blocking
 - 🛡️ Universal Manifest V3 support (Chrome & Firefox)
 - 📦 Single codebase for both browsers
 - 🔄 Automatic profile synchronization
-- ⚡ Modern ES module architecture
+- ⚡ TypeScript + [WXT](https://wxt.dev) build
 
 ## Usage
 
 - **Popup**: Quick domain management (click extension icon)
-- **Manager**: Full configuration (`Open Full Manager` link in popup)
+- **Manager**: Full configuration (`Open Full Manager` in the popup, or the extension's options page)
 
 ## Acknowledgements
 - This project was developed with assistance from AI coding tools
@@ -108,7 +113,7 @@ See [CHANGELOG.md](CHANGELOG.md) for version history
 
 If Focus Guard helps you stay productive, consider supporting its development:
 
-[![Buy Me A Coffee](bmc-logo.png)](https://www.buymeacoffee.com/tomhat)
+[![Buy Me A Coffee](public/images/bmc-logo.png)](https://www.buymeacoffee.com/tomhat)
 
 Your support helps maintain and improve this extension!
 

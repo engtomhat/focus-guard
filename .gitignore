@@ -20,3 +20,9 @@ node_modules/
 *.tar.gz
 *.xpi
 /dist/
+
+# WXT
+.output/
+.wxt/
+stats.html
+coverage/

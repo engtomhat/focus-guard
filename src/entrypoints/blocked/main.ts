@@ -1,23 +1,24 @@
 // Focus Guard Blocked Page Script
 // Shows when a blocked site is accessed
-import { images } from "./lib/core/images.js"
+import { images } from "@/lib/core/images"
+import { byId } from "@/lib/ui/dom"
 
-let originalUrl = ""
-let copyFeedbackSpan, errorFeedbackSpan
+let copyFeedbackSpan: HTMLSpanElement
+let errorFeedbackSpan: HTMLSpanElement
 
 document.addEventListener("DOMContentLoaded", () => {
-  const originalUrlElement = document.getElementById("originalUrl")
-  const blockedImage = document.getElementById("blockedImage")
-  const profileName = document.getElementById("profileName")
-  const copyUrlBtn = document.getElementById("copyUrlBtn")
-  const urlDisplay = document.querySelector(".blocked-url-display")
+  const originalUrlElement = byId("originalUrl")
+  const blockedImage = byId<HTMLImageElement>("blockedImage")
+  const profileName = byId("profileName")
+  const copyUrlBtn = byId("copyUrlBtn")
+  const urlDisplay = document.querySelector<HTMLElement>(".blocked-url-display")
   let originalUrlText = ""
 
   // Create feedback spans once
   copyFeedbackSpan = document.createElement('span')
   copyFeedbackSpan.textContent = 'Link Copied!'
   copyFeedbackSpan.style.color = 'var(--primary)'
-  
+
   errorFeedbackSpan = document.createElement('span')
   errorFeedbackSpan.textContent = 'Copy failed!'
   errorFeedbackSpan.style.color = 'var(--danger)'
@@ -28,7 +29,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const profile = urlParams.get("profile")
 
   if (url) {
-    originalUrl = url
     originalUrlElement.textContent = url
     originalUrlText = url
   }
@@ -46,33 +46,24 @@ document.addEventListener("DOMContentLoaded", () => {
   copyUrlBtn.addEventListener("click", async () => {
     try {
       await navigator.clipboard.writeText(originalUrlText)
-      showCopyFeedback(urlDisplay)
+      showFeedback(urlDisplay, copyFeedbackSpan)
     } catch (err) {
       console.error("Failed to copy URL:", err)
       // Show error feedback instead of fallback
-      showErrorFeedback(urlDisplay)
+      showFeedback(urlDisplay, errorFeedbackSpan)
     }
   })
 })
 
-function showCopyFeedback(urlDisplay) {
-  const urlText = urlDisplay.querySelector(".url-text")
+function showFeedback(urlDisplay: HTMLElement | null, feedbackSpan: HTMLSpanElement) {
+  const urlText = urlDisplay?.querySelector(".url-text")
+  if (!urlText) {
+    return
+  }
   const originalText = urlText.textContent
 
   urlText.textContent = ''
-  urlText.appendChild(copyFeedbackSpan)
-
-  setTimeout(() => {
-    urlText.textContent = originalText
-  }, 1000)
-}
-
-function showErrorFeedback(urlDisplay) {
-  const urlText = urlDisplay.querySelector(".url-text")
-  const originalText = urlText.textContent
-
-  urlText.textContent = ''
-  urlText.appendChild(errorFeedbackSpan)
+  urlText.appendChild(feedbackSpan)
 
   setTimeout(() => {
     urlText.textContent = originalText

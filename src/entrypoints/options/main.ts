@@ -1,22 +1,24 @@
-import { profiles } from "./lib/core/profiles.js"
-import { domains } from "./lib/core/domains.js"
-import { images } from "./lib/core/images.js"
+import { profiles } from "@/lib/core/profiles"
+import { domains } from "@/lib/core/domains"
+import { images } from "@/lib/core/images"
+import type { Profiles } from "@/lib/core/types"
+import { byId, errorMessage, showInputError } from "@/lib/ui/dom"
 
 // DOM elements
-const domainInput = document.getElementById("domainInput")
-const addDomainBtn = document.getElementById("addDomain")
-const domainList = document.getElementById("domainList")
-const imageUpload = document.getElementById("imageUpload")
-const imagePreview = document.getElementById("imagePreview")
-const resetImageBtn = document.getElementById("resetImage")
-const profileSelector = document.getElementById("profileSelector")
-const profileNameInput = document.getElementById("profileNameInput")
-const addProfileBtn = document.getElementById("addProfile")
-const deleteProfileBtn = document.getElementById("deleteProfile")
-const resetSettingsBtn = document.getElementById("resetSettings")
+const domainInput = byId<HTMLInputElement>("domainInput")
+const addDomainBtn = byId<HTMLButtonElement>("addDomain")
+const domainList = byId<HTMLUListElement>("domainList")
+const imageUpload = byId<HTMLInputElement>("imageUpload")
+const imagePreview = byId<HTMLImageElement>("imagePreview")
+const resetImageBtn = byId("resetImage")
+const profileSelector = byId<HTMLSelectElement>("profileSelector")
+const profileNameInput = byId<HTMLInputElement>("profileNameInput")
+const addProfileBtn = byId<HTMLButtonElement>("addProfile")
+const deleteProfileBtn = byId<HTMLButtonElement>("deleteProfile")
+const resetSettingsBtn = byId<HTMLButtonElement>("resetSettings")
 
 let activeProfile = "default"
-let profilesData = {}
+let profilesData: Profiles = {}
 
 // Initialize
 async function init() {
@@ -40,15 +42,13 @@ async function loadProfiles() {
 // Load profiles and populate selector
 function displayProfiles() {
   // Clear existing options
-  while (profileSelector.firstChild) {
-    profileSelector.removeChild(profileSelector.firstChild)
-  }
+  profileSelector.replaceChildren()
 
   // Populate profile selector
-  Object.keys(profilesData).forEach((profileId) => {
+  Object.entries(profilesData).forEach(([profileId, profile]) => {
     const option = document.createElement("option")
     option.value = profileId
-    option.textContent = profilesData[profileId].name
+    option.textContent = profile.name
 
     if (profileId === activeProfile) {
       option.selected = true
@@ -75,14 +75,12 @@ function updateDeleteButtonState() {
 
 // Load domains for the selected profile
 function displayDomains() {
-  const domains = profilesData[activeProfile].domains
+  const domainsData = profilesData[activeProfile]?.domains
 
-  while (domainList.firstChild) {
-    domainList.removeChild(domainList.firstChild)
-  }
+  domainList.replaceChildren()
 
-  if (domains?.length > 0) {
-    domains.forEach((domain) => {
+  if (domainsData && domainsData.length > 0) {
+    domainsData.forEach((domain) => {
       const li = document.createElement("li")
       const span = document.createElement("span")
       span.textContent = domain
@@ -104,25 +102,18 @@ async function loadImage() {
   imagePreview.src = await images.loadImage()
 }
 
-// Show an error on an input using the browser's built-in validation bubble
-function showInputError(input, message) {
-  input.setCustomValidity(message)
-  input.reportValidity()
-  input.addEventListener("input", () => input.setCustomValidity(""), { once: true })
-}
-
 // Add domain to current profile
 async function addDomain() {
   const domain = domainInput.value.trim()
-  if (domain && !profilesData[activeProfile].domains.includes(domain)) {
+  if (domain && !profilesData[activeProfile]?.domains.includes(domain)) {
     // Add domain to active profile if it doesn't already exist
     try {
       await domains.addDomain(activeProfile, domain)
       await refreshProfiles()
-      document.getElementById("domainInput").value = ""
+      domainInput.value = ""
     } catch (error) {
       console.error("Error adding domain:", error)
-      showInputError(domainInput, `Could not save: ${error.message}`)
+      showInputError(domainInput, `Could not save: ${errorMessage(error)}`)
     }
   }
 }
@@ -142,7 +133,7 @@ async function resetSettings() {
 }
 
 // Remove domain from current profile
-async function removeDomain(domain) {
+async function removeDomain(domain: string | undefined) {
   if (domain) {
     try {
       await domains.removeDomain(activeProfile, domain)
@@ -196,7 +187,10 @@ async function deleteProfile() {
     await profiles.removeProfile(selectedProfile)
 
     // Switch to first remaining profile
-    await switchProfile(Object.keys(profilesData)[0])
+    const firstProfileId = Object.keys(profilesData)[0]
+    if (firstProfileId) {
+      await switchProfile(firstProfileId)
+    }
     await refreshProfiles()
   } catch (error) {
     console.error("Error deleting profile:", error)
@@ -208,9 +202,9 @@ async function switchProfileToSelected() {
   await switchProfile(profileSelector.value)
 }
 
-async function switchProfile(profileId) {
+async function switchProfile(profileId: string) {
   try {
-    activeProfile = await profiles.switchProfile(profileId)
+    await profiles.switchProfile(profileId)
     await refreshProfiles()
   } catch (error) {
     console.error("Error switching profile:", error)
@@ -228,9 +222,9 @@ domainInput.addEventListener("keypress", (e) => {
 })
 
 domainList.addEventListener("click", (e) => {
-  if (e.target.classList.contains("remove-btn")) {
-    const domain = e.target.dataset.domain
-    removeDomain(domain)
+  const target = e.target
+  if (target instanceof HTMLElement && target.classList.contains("remove-btn")) {
+    removeDomain(target.dataset.domain)
   }
 })
 
@@ -247,14 +241,14 @@ profileNameInput.addEventListener("keypress", (e) => {
 deleteProfileBtn.addEventListener("click", deleteProfile)
 
 // Handle image upload
-imageUpload.addEventListener("change", (e) => {
-  const file = e.target.files[0]
+imageUpload.addEventListener("change", () => {
+  const file = imageUpload.files?.[0]
   if (file) {
     const reader = new FileReader()
-    reader.onload = async (event) => {
+    reader.onload = async () => {
       try {
         // Compress and save image using images module
-        const compressed = await images.compressImage(event.target.result, 0.7)
+        const compressed = await images.compressImage(reader.result as string, 0.7)
         await images.saveImage(compressed)
         // Load the image using the manager's loadImage function
         await loadImage()
@@ -279,8 +273,8 @@ resetImageBtn.addEventListener("click", async () => {
 })
 
 // Tab switching functionality
-const tabBtns = document.querySelectorAll(".tab-btn")
-const tabPanels = document.querySelectorAll(".tab-panel")
+const tabBtns = document.querySelectorAll<HTMLElement>(".tab-btn")
+const tabPanels = document.querySelectorAll<HTMLElement>(".tab-panel")
 
 tabBtns.forEach((btn) => {
   btn.addEventListener("click", () => {
@@ -292,7 +286,7 @@ tabBtns.forEach((btn) => {
 
     // Add active class to clicked tab and corresponding panel
     btn.classList.add("active")
-    document.getElementById(`${targetTab}-tab`).classList.add("active")
+    byId(`${targetTab}-tab`).classList.add("active")
   })
 })
 

@@ -1,9 +1,11 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <meta charset="UTF-8">
+  <meta name="manifest.open_in_tab" content="true">
   <title>Focus Guard Manager</title>
-  <link rel="stylesheet" href="styles/main.css">
-  <script src="manager.js" type="module"></script>
+  <link rel="stylesheet" href="../../styles/main.css">
+  <script src="./main.ts" type="module"></script>
 </head>
 <body>
   <div class="blocked-container manager-container">
@@ -66,7 +68,7 @@
             <input type="file" id="imageUpload" accept="image/*">
             
             <div class="image-preview">
-              <img src="images/default-blocked.png" alt="Default focus reminder" id="imagePreview">
+              <img src="/images/default-blocked.png" alt="Default focus reminder" id="imagePreview">
             </div>
           </div>
         </div>
@@ -102,7 +104,7 @@
   
   <div class="bmc-container">
     <a href="https://www.buymeacoffee.com/tomhat" target="_blank" rel="noopener noreferrer">
-      <img src="images/bmc-logo.png" alt="Buy Me A Coffee">
+      <img src="/images/bmc-logo.png" alt="Buy Me A Coffee">
     </a>
   </div>
 </body>

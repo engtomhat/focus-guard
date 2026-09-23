@@ -1,13 +1,13 @@
 // Domain-related operations (browser-agnostic)
 
-import { profiles } from "./profiles.js"
+import { profiles } from "./profiles"
 
 export const domains = {
-  normalize(domain) {
-    return domain.trim().replace(/^https?:\/\//, '').split('/')[0]
+  normalize(domain: string): string {
+    return domain.trim().replace(/^https?:\/\//, '').split('/')[0] ?? ''
   },
   
-  async getBlockedList(profileId) {
+  async getBlockedList(profileId: string): Promise<string[]> {
     const profile = await profiles.getProfile(profileId)
     if (!profile) {
       throw new Error(`Profile ${profileId} not found`)
@@ -15,35 +15,37 @@ export const domains = {
     return profile.domains || []
   },
   
-  matches(urlHostname, blockedDomains) {
+  matches(urlHostname: string, blockedDomains: string[]): boolean {
     return blockedDomains.some(blockedDomain => {
       return urlHostname === blockedDomain ||
              urlHostname.endsWith(`.${blockedDomain}`)
     })
   },
 
-  async isBlocked(urlHostname, profileId) {
+  async isBlocked(urlHostname: string, profileId: string): Promise<boolean> {
     const blockedDomains = await this.getBlockedList(profileId)
     return this.matches(urlHostname, blockedDomains)
   },
 
-  async addDomain(profileId, domain) {
+  async addDomain(profileId: string, domain: string): Promise<void> {
     const profilesData = await profiles.getProfiles()
-    if (profilesData[profileId]) {
-      profilesData[profileId].domains.push(domain)
+    const profile = profilesData?.[profileId]
+    if (profilesData && profile) {
+      profile.domains.push(domain)
       await profiles.setProfiles(profilesData)
     } else {
       throw new Error(`Profile ${profileId} not found`)
     }
   },
 
-  async removeDomain(profileId, domain) {
+  async removeDomain(profileId: string, domain: string): Promise<void> {
     const profilesData = await profiles.getProfiles()
-    if (profilesData[profileId]) {
-      profilesData[profileId].domains = profilesData[profileId].domains.filter(d => d !== domain)
+    const profile = profilesData?.[profileId]
+    if (profilesData && profile) {
+      profile.domains = profile.domains.filter(d => d !== domain)
       await profiles.setProfiles(profilesData)
     } else {
-      throw new Warning(`Profile ${profileId} not found`)
+      throw new Error(`Profile ${profileId} not found`)
     }
   }
 }
