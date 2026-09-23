@@ -1,6 +1,26 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
+## [3.0.0](https://github.com/engtomhat/focus-guard/compare/v2.2.1...v3.0.0) (2026-09-23)
+
+
+### ⚠ BREAKING CHANGES
+
+* the storage layout changes to per-profile sync keys with a device-local active profile. Existing 2.x data is migrated automatically; edits made on a device still running 2.x after another device has migrated are not picked up.
+
+### Features
+
+* per-profile storage, device-local active profile, domain normalization, open-tab recheck ([aee628f](https://github.com/engtomhat/focus-guard/commit/aee628f9b9d7f1b67ef98a896f6d3578fcf17544)), closes [#49](https://github.com/engtomhat/focus-guard/issues/49)
+* shared profile view, image pipeline, backup export/import, accessibility and dark mode ([e4b70bb](https://github.com/engtomhat/focus-guard/commit/e4b70bb4e7047020719b6970f19c6dc6f8bd61ce))
+* shared profile view, image pipeline, backup export/import, accessibility and dark mode ([a294dca](https://github.com/engtomhat/focus-guard/commit/a294dcac7a7a87dd32f2e80990c370a9a11b8c90)), closes [#50](https://github.com/engtomhat/focus-guard/issues/50)
+* strict CSP, no-network and permission guards, end-to-end tests in CI ([0a74291](https://github.com/engtomhat/focus-guard/commit/0a74291d6f59d66ea21ec4b48fe94e116d946a52))
+* strict CSP, no-network and permission guards, end-to-end tests in CI ([50fe3b4](https://github.com/engtomhat/focus-guard/commit/50fe3b4bc5d42c39312c58ca8bdb8998678bae0b)), closes [#51](https://github.com/engtomhat/focus-guard/issues/51)
+
+
+### Bug Fixes
+
+* require Firefox 140 (Android 142) to match the data collection declaration ([#62](https://github.com/engtomhat/focus-guard/issues/62)) ([54f217f](https://github.com/engtomhat/focus-guard/commit/54f217f4e1e891306639a472d875fd480c2fe55e))
+
 ## [2.2.1] - 2026-09-23
 ### Fixed
 - A blocked domain loaded inside an iframe (e.g. an embedded video or a like button) no longer replaces the whole tab; only top-level navigations are blocked
