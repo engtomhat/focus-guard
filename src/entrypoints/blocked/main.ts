@@ -1,6 +1,6 @@
 // Focus Guard Blocked Page Script
 // Shows when a blocked site is accessed
-import { images } from "@/lib/core/images"
+import { loadImage } from "@/lib/storage"
 import { byId } from "@/lib/ui/dom"
 
 let copyFeedbackSpan: HTMLSpanElement
@@ -38,7 +38,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // Load custom image if set
-  images.loadImage().then((image) => {
+  loadImage().then((image) => {
     blockedImage.src = image
   })
 

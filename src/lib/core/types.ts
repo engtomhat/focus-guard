@@ -4,5 +4,5 @@ export interface Profile {
   createdAt?: string
 }
 
-/** Profiles keyed by profile id ("default", "profile_<timestamp>", ...) */
+/** Profiles keyed by profile id ("default", "profile_<uuid>", ...) */
 export type Profiles = Record<string, Profile>
