@@ -5,8 +5,15 @@ updates:
     schedule:
       interval: weekly
     groups:
-      npm-dependencies:
-        patterns: ["*"]
+      # Minor and patch updates together in one PR. Major updates get a PR each,
+      # so one incompatible major can't block every other update.
+      npm-minor-and-patch:
+        update-types: ["minor", "patch"]
+    ignore:
+      # typescript-eslint only supports TypeScript < 6.1 (peer dependency).
+      # Remove this once typescript-eslint supports TypeScript 7.
+      - dependency-name: typescript
+        update-types: ["version-update:semver-major"]
     commit-message:
       prefix: chore(deps)
 
