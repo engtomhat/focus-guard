@@ -1,8 +1,12 @@
-import { profiles } from "./lib/core/profiles.js"
-import { domains } from "./lib/core/domains.js"
+import { profiles } from "@/lib/core/profiles"
+import { domains } from "@/lib/core/domains"
+import type { Profiles } from "@/lib/core/types"
+import { runtime } from "@/lib/browser/adapter"
+import { byId, errorMessage, showInputError } from "@/lib/ui/dom"
 
 let activeProfile = "default"
-let profilesData = {}
+let profilesData: Profiles = {}
+
 // Load profiles and display active profile
 async function init() {
   await loadProfiles()
@@ -17,9 +21,8 @@ async function loadProfiles() {
 }
 
 function displayProfiles() {
-
-  const profileSelector = document.getElementById("profileSelector")
-  const profileContainer = document.getElementById("profileSelectorContainer")
+  const profileSelector = byId<HTMLSelectElement>("profileSelector")
+  const profileContainer = byId("profileSelectorContainer")
 
   // Clear existing options
   profileSelector.replaceChildren()
@@ -33,10 +36,10 @@ function displayProfiles() {
     profileContainer.style.display = "flex"
 
     // Populate profile selector
-    Object.keys(profilesData).forEach((profileId) => {
+    Object.entries(profilesData).forEach(([profileId, profile]) => {
       const option = document.createElement("option")
       option.value = profileId
-      option.textContent = profilesData[profileId].name
+      option.textContent = profile.name
 
       if (profileId === activeProfile) {
         option.selected = true
@@ -49,12 +52,12 @@ function displayProfiles() {
 
 // Display domains for the active profile
 function displayDomains() {
-  const domainList = document.getElementById("domainList")
+  const domainList = byId("domainList")
 
   // Clear existing domains
   domainList.replaceChildren()
 
-  const domainsData = profilesData[activeProfile].domains
+  const domainsData = profilesData[activeProfile]?.domains
   if (domainsData && domainsData.length > 0) {
     domainsData.forEach((domain) => {
       const li = document.createElement("li")
@@ -72,34 +75,28 @@ function displayDomains() {
   }
 }
 
-// Show an error on an input using the browser's built-in validation bubble
-function showInputError(input, message) {
-  input.setCustomValidity(message)
-  input.reportValidity()
-  input.addEventListener("input", () => input.setCustomValidity(""), { once: true })
-}
-
 // Add new domain to active profile
 async function addDomain() {
-  const domain = document.getElementById("domainInput").value.trim()
-  if (domain && !profilesData[activeProfile].domains.includes(domain)) {
+  const domainInput = byId<HTMLInputElement>("domainInput")
+  const domain = domainInput.value.trim()
+  if (domain && !profilesData[activeProfile]?.domains.includes(domain)) {
     // Add domain to active profile if it doesn't already exist
     try {
-      profilesData[activeProfile] = await domains.addDomain(activeProfile, domain)
+      await domains.addDomain(activeProfile, domain)
       await init()
-      document.getElementById("domainInput").value = ""
+      domainInput.value = ""
     } catch (error) {
       console.error("Error adding domain:", error)
-      showInputError(document.getElementById("domainInput"), `Could not save: ${error.message}`)
+      showInputError(domainInput, `Could not save: ${errorMessage(error)}`)
     }
   }
 }
 
 // Remove domain from active profile
-async function removeDomain(domain) {
+async function removeDomain(domain: string | undefined) {
   if (domain) {
     try {
-      profilesData[activeProfile] = await domains.removeDomain(activeProfile, domain)
+      await domains.removeDomain(activeProfile, domain)
       await init()
     } catch (error) {
       console.error("Error removing domain:", error)
@@ -109,11 +106,10 @@ async function removeDomain(domain) {
 
 // Switch active profile
 async function switchProfile() {
-  const profileSelector = document.getElementById("profileSelector")
-  const selectedProfile = profileSelector.value
+  const selectedProfile = byId<HTMLSelectElement>("profileSelector").value
 
   try {
-    activeProfile = await profiles.switchProfile(selectedProfile)
+    await profiles.switchProfile(selectedProfile)
     await init()
   } catch (error) {
     console.error("Error switching profile:", error)
@@ -121,25 +117,25 @@ async function switchProfile() {
 }
 
 // Event listeners
-document.getElementById("addDomain").addEventListener("click", addDomain)
+byId("addDomain").addEventListener("click", addDomain)
 
-document.getElementById("domainInput").addEventListener("keypress", (e) => {
+byId("domainInput").addEventListener("keypress", (e) => {
   if (e.key === "Enter") {
     addDomain()
   }
 })
 
 document.addEventListener("click", (e) => {
-  if (e.target.classList.contains("remove-btn")) {
-    const domain = e.target.getAttribute("data-domain")
-    removeDomain(domain)
+  const target = e.target
+  if (target instanceof HTMLElement && target.classList.contains("remove-btn")) {
+    removeDomain(target.dataset.domain)
   }
 })
 
-document.getElementById("profileSelector").addEventListener("change", switchProfile)
+byId("profileSelector").addEventListener("change", switchProfile)
 
-document.getElementById("openManager").addEventListener("click", () => {
-  chrome.tabs.create({ url: "manager.html" })
+byId("openManager").addEventListener("click", () => {
+  runtime.openOptionsPage()
 })
 
 // Initialize

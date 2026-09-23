@@ -1,0 +1,12 @@
+{
+  "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",
+  "bootstrap-sha": "dd7db3457e9998896f917ec0d095371470c50f08",
+  "include-component-in-tag": false,
+  "packages": {
+    ".": {
+      "release-type": "node",
+      "package-name": "focus-guard",
+      "changelog-path": "CHANGELOG.md"
+    }
+  }
+}
