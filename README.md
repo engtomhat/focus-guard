@@ -90,9 +90,16 @@ npm run zip           # Store-ready zips in .output/ (plus the Firefox sources z
 npm run lint          # ESLint
 npm run compile       # TypeScript typecheck
 npm test              # Unit tests + production build checks
+npm run test:e2e      # Builds, then runs the extension in real Chromium and Firefox
 ```
 
 To load a build by hand: in Chrome, "Load unpacked" from `.output/chrome-mv3`; in Firefox, `about:debugging` → "Load Temporary Add-on" → any file in `.output/firefox-mv3`.
+
+In dev mode (`npm run dev:firefox`), Firefox may ask whether Focus Guard can "access other apps and services on this device". That's the dev server's hot reload connecting to `localhost`; allow it. Production builds never connect anywhere.
+
+**End-to-end tests** need Playwright's Chromium (`npx playwright install chromium`) and Firefox installed. The upgrade tests run only when `E2E_UPGRADE_FROM_DIR` points at the 2.2.1 release zips (`gh release download v2.2.1 --dir <dir>`); CI always runs them.
+
+**Screenshots** for pull requests that change what users see: `npm run build && npm run screenshots -- .output/chrome-mv3 <output dir>` (add `--dark` for dark mode).
 
 Releases are automated; see [RELEASING.md](RELEASING.md).
 

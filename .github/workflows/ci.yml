@@ -46,6 +46,17 @@ jobs:
       - name: Lint Firefox build (addons-linter)
         run: npm run lint:firefox
 
+      # A new permission warning disables the extension for existing Chrome users until they approve it
+      - name: Permissions must not grow beyond the last release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release download --repo "$GITHUB_REPOSITORY" --pattern '*chrome.zip' --pattern '*firefox.zip' --dir previous-release
+          unzip -p previous-release/*chrome.zip manifest.json > previous-release/chrome.json
+          unzip -p previous-release/*firefox.zip manifest.json > previous-release/firefox.json
+          npm run check:permissions -- .output/chrome-mv3/manifest.json previous-release/chrome.json
+          npm run check:permissions -- .output/firefox-mv3/manifest.json previous-release/firefox.json
+
       - name: Upload zips
         uses: actions/upload-artifact@v7
         with:
@@ -55,3 +66,36 @@ jobs:
           include-hidden-files: true
           if-no-files-found: error
           retention-days: 7
+
+  e2e:
+    name: end-to-end (Chromium + Firefox)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Chromium for Playwright
+        run: npx playwright install --with-deps chromium
+
+      # Firefox itself comes preinstalled on GitHub's Ubuntu runners
+      - name: Firefox version
+        run: firefox --version
+
+      # The upgrade tests start from the last 2.x release (the old storage layout) and
+      # check that upgrading to this build keeps the user's data
+      - name: Download 2.2.1 (for the upgrade tests)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release download v2.2.1 --repo "$GITHUB_REPOSITORY" --pattern '*chrome.zip' --pattern '*firefox.zip' --dir upgrade-from
+
+      - name: Build and run end-to-end tests
+        env:
+          E2E_UPGRADE_FROM_DIR: upgrade-from
+        run: npm run test:e2e

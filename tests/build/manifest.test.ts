@@ -6,6 +6,8 @@ import { join } from 'node:path';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { build } from 'wxt';
 import packageJson from '../../package.json';
+import { EXTENSION_PAGES_CSP } from '../../wxt.config';
+import { findNetworkAccess } from '../support/network-invariant';
 
 const outRoot = mkdtempSync(join(tmpdir(), 'focus-guard-build-'));
 
@@ -59,15 +61,17 @@ describe.each(['chrome', 'firefox'] as const)('%s production build', (browser) =
     }
   });
 
-  it('loads nothing from the network', () => {
-    for (const file of files(get().dir).filter(f => /\.(html|js|css)$/.test(f))) {
-      const text = readFileSync(file, 'utf8');
-      // Links the user clicks (<a href>) are fine; anything loaded automatically is not
-      expect(text, file).not.toMatch(/\bsrc=["']https?:/);
-      expect(text, file).not.toMatch(/<link[^>]+href=["']https?:/);
-      expect(text, file).not.toMatch(/url\(\s*["']?https?:/);
-      expect(text, file).not.toMatch(/@import\s+["']https?:/);
-    }
+  it('contains no network access at all', () => {
+    const findings = files(get().dir)
+      .filter(f => /\.(html|js|css|json)$/.test(f))
+      .flatMap(file => findNetworkAccess(readFileSync(file, 'utf8')).map(found => `${file}: ${found}`));
+    expect(findings).toEqual([]);
+  });
+
+  it('locks extension pages down with a strict Content Security Policy', () => {
+    expect(get().manifest.content_security_policy).toEqual({ extension_pages: EXTENSION_PAGES_CSP });
+    expect(EXTENSION_PAGES_CSP).toContain("connect-src 'none'");
+    expect(EXTENSION_PAGES_CSP).toContain("frame-ancestors 'none'");
   });
 });
 
