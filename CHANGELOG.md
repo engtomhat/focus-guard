@@ -1,6 +1,13 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
+## [3.0.1](https://github.com/engtomhat/focus-guard/compare/v3.0.0...v3.0.1) (2026-09-23)
+
+
+### Bug Fixes
+
+* show input errors under the field; list Firefox for desktop only ([#69](https://github.com/engtomhat/focus-guard/issues/69)) ([7f8906c](https://github.com/engtomhat/focus-guard/commit/7f8906c22ba6b1ad01b6dc2ebee370fc2738d203))
+
 ## [3.0.0](https://github.com/engtomhat/focus-guard/compare/v2.2.1...v3.0.0) (2026-09-23)
 
 A rebuilt Focus Guard: smarter blocking, per-device profiles, backups, dark mode, and a privacy guarantee that is now enforced by tests.
