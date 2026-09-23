@@ -7,9 +7,11 @@ Releases are automated with [release-please](https://github.com/googleapis/relea
 1. **Merge pull requests into `main`.** PRs are squash-merged, so each PR becomes one commit named after its title. Titles follow [Conventional Commits](https://www.conventionalcommits.org/):
    - `fix: ...` → patch release (3.0.0 → 3.0.1)
    - `feat: ...` → minor release (3.0.x → 3.1.0)
-   - `feat!: ...` or a `BREAKING CHANGE:` footer → major release
-   - `docs:`, `test:`, `refactor:`, `ci:`, `chore:` → no release on their own
-2. **release-please keeps a release PR open**, titled `chore(main): release X.Y.Z`. It bumps `package.json`/`package-lock.json`, adds the CHANGELOG entry, and updates itself as more PRs are merged.
+   - `feat!: ...` (note the `!`) → major release (3.x.y → 4.0.0)
+   - `docs:`, `test:`, `refactor:`, `ci:`, `chore:` → no release on their own; they're included in the next one
+
+   Only the **title** matters: squash merges here use a blank commit message, so footers written in the PR description (like `BREAKING CHANGE:`) never reach `main`. Mark breaking changes with `!` in the title.
+2. **release-please opens a release PR** as soon as `main` has a `fix:` or `feat:` since the last release. It runs after every merge to `main`, and the PR is titled `chore(main): release X.Y.Z`. It bumps `package.json`/`package-lock.json`, adds the CHANGELOG entry, and updates itself as more PRs are merged. There is nothing to trigger by hand: **merging the release PR is how you decide to release.**
 3. **Test the release build (beta)** before merging it. See below.
 4. **Merge the release PR.** The Release workflow then:
    - tags `vX.Y.Z` and creates the GitHub Release, using the release PR's description as the notes
@@ -18,7 +20,28 @@ Releases are automated with [release-please](https://github.com/googleapis/relea
    - **Chrome Web Store:** upload the `-chrome.zip` in the [developer dashboard](https://chrome.google.com/webstore/devconsole).
    - **Firefox Add-ons:** upload the `-firefox.zip` in the [developer hub](https://addons.mozilla.org/developers/). When asked for source code, upload the `-sources.zip`; the build instructions are below.
 
-To force a specific version, put `Release-As: X.Y.Z` in a commit message footer.
+## Choosing a different version
+
+release-please picks the version from the PR titles. To release a specific version instead (for example `3.1.0` when only fixes were merged), use either of these:
+
+- **While merging a PR:** click **Squash and merge**, and in the commit dialog's **extended description** box type:
+  ```
+  Release-As: 3.1.0
+  ```
+  (It has to go there: the PR description is not part of the squash commit.)
+- **With a config change:** add `"release-as": "3.1.0"` to the `"."` package in `release-please-config.json` in a PR, and remove it again in a follow-up PR after that release. Otherwise every later release would try to be 3.1.0 again.
+
+release-please then updates (or opens) the release PR with that version.
+
+## Re-running the Release workflow
+
+The Release workflow runs on every push to `main`. To run it again without a new commit (for example after a failed run, or if the release PR didn't update), use **Actions → Release → Run workflow**, with branch `main`, or:
+
+```bash
+gh workflow run Release --ref main
+```
+
+It only works on `main`; release-please would otherwise open release PRs against another branch. If only the build/attach step failed, re-running that run's failed jobs (**Re-run jobs**) also works.
 
 ## Testing the release build (beta)
 

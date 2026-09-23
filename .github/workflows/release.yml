@@ -3,11 +3,16 @@ name: Release
 on:
   push:
     branches: [main]
+  # Run by hand from Actions → Release → Run workflow (main only), e.g. to retry a
+  # failed run or to make release-please re-check main without a new commit
+  workflow_dispatch:
 
 permissions: {}
 
 jobs:
   release-please:
+    # release-please opens release PRs against the branch it runs on: only ever main
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     permissions:
       contents: write

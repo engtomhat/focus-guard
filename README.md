@@ -114,7 +114,15 @@ In dev mode (`npm run dev:firefox`), Firefox may ask whether Focus Guard can "ac
 
 **Screenshots** for pull requests that change what users see: `npm run build && npm run screenshots -- .output/chrome-mv3 <output dir>` (add `--dark` for dark mode).
 
-Releases are automated; see [RELEASING.md](RELEASING.md).
+### Releasing
+
+Releases are automated with [release-please](https://github.com/googleapis/release-please), driven by pull request titles:
+
+1. Merge PRs titled `fix: …` (→ patch), `feat: …` (→ minor) or `feat!: …` (→ major). Other types (`docs:`, `ci:`, `test:`, …) don't cause a release by themselves.
+2. release-please opens or updates a **release PR**, `chore(main): release X.Y.Z`, with the version bump and changelog.
+3. **Merging the release PR publishes the release:** it tags `vX.Y.Z` and creates a GitHub Release with the Chrome, Firefox and source zips, ready to upload to the stores.
+
+Details (testing the release build first, forcing a version, rollback, store uploads) are in [RELEASING.md](RELEASING.md).
 
 ### Key Features
 - 🚀 Background service-based blocking
