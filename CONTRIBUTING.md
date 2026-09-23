@@ -44,6 +44,7 @@ The end-to-end tests need Playwright's Chromium (`npx playwright install chromiu
 - **Title:** use [Conventional Commits](https://www.conventionalcommits.org/), because the title becomes the changelog entry:
   - `fix: ...` for bug fixes
   - `feat: ...` for new features
+  - `feat!: ...` (or `fix!:`) for changes that break something for existing users
   - `docs:`, `test:`, `refactor:`, `ci:`, `chore:` for everything else (not listed in the changelog)
 - **Tests:** add or update tests for what you change.
 - **Screenshots:** if your change affects anything users see, add before/after screenshots:
