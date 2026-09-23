@@ -13,6 +13,14 @@
   </p>
 </div>
 
+<p align="center">
+  <img src="docs/images/popup.png" width="240" alt="Focus Guard popup with a list of blocked domains">
+  <img src="docs/images/popup-dark.png" width="240" alt="The popup in dark mode">
+  <img src="docs/images/blocked.png" width="330" alt="The page shown instead of a blocked site">
+</p>
+
+**Private by design:** everything stays in your browser. No accounts, no servers, no tracking. See the [privacy policy](PRIVACY.md).
+
 ## Features
 
 ✅ **Domain Management**
@@ -32,7 +40,7 @@
 - Preview of the current image in the manager
 
 ✅ **Cross-Browser Support**
-- Blocks distracting websites across multiple browsers
+- Chrome (and Chromium-based browsers) and Firefox 112+, from one codebase
 
 ✅ **Profile Management**
 - Manage multiple blocklists
@@ -43,18 +51,23 @@
 - Keyboard-friendly manager tabs and controls
 - Dark mode follows your system setting
 
-## Architecture
+## How it works
 
 ```mermaid
 graph TD
-    A[Popup] -->|Quick Add/Remove| B(Domains)
-    C[Manager] -->|Full Control| B
-    C --> D(Images)
-    B --> E[Background]
-    D --> E
-    E -->|Blocks| F[Web Navigation]
-    F -->|Shows| G[Blocked Page]
+    Popup[Popup] -->|add / remove domains, switch profile| Storage
+    Manager[Manager / options page] -->|profiles, image, backup| Storage
+    Storage[("Browser storage<br/>sync: profiles and domains<br/>local: active profile, image")]
+    Storage -->|changes| Background
+    Nav[Page navigation] --> Background
+    Background[Background] -->|blocked domain?| Blocked[Blocked page]
 ```
+
+The background checks every page you start loading (and, when your blocklist changes, the tabs already open) against the active profile, and replaces blocked sites with the blocked page. It never reads page content and never uses the network. See [CONTRIBUTING.md](CONTRIBUTING.md) for how the code is organized.
+
+<p align="center">
+  <img src="docs/images/options-domains.png" width="500" alt="The manager: profiles and blocked domains">
+</p>
 
 ## Installation
 
@@ -115,6 +128,10 @@ Releases are automated; see [RELEASING.md](RELEASING.md).
 - **Popup**: Quick domain management (click extension icon)
 - **Manager**: Full configuration (`Open Full Manager` in the popup, or the extension's options page)
 
+## Contributing
+
+Issues and pull requests are welcome; see [CONTRIBUTING.md](CONTRIBUTING.md). Ideas for future versions are in [TODO.md](TODO.md).
+
 ## Acknowledgements
 - This project was developed with assistance from AI coding tools
 - Special thanks to [Windsurf](https://windsurf.dev) and [DeepSeek](https://deepseek.com) for their coding assistance
@@ -134,6 +151,8 @@ Your support helps maintain and improve this extension!
 - Focus Guard makes no network requests and uses no third-party services
 - Your profiles and blocked domains are stored in your browser, and synced only through your own browser account if browser sync is enabled
 - No user activity data is collected by the extension itself
+
+Full details: [PRIVACY.md](PRIVACY.md).
 
 ## License
 GNU General Public License v3.0 - See [LICENSE](LICENSE) for full text

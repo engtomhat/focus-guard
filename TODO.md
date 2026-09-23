@@ -1,22 +1,22 @@
-# Domain Blocker - Future Enhancements
+# Roadmap
 
-## Core Features
-- [x] **Firefox support** - Added in v1.4.0
-- [ ] **Whitelist functionality**: Allow exceptions to blocked domains
-- [ ] **Scheduled blocking**: Set time windows when domains should be blocked
-- [ ] **Advanced matching**: Support regex patterns for domain blocking
+Ideas for future versions. Contributions welcome: please [open an issue](https://github.com/engtomhat/focus-guard/issues) to discuss one before starting. Everything must stay self-contained (see [CONTRIBUTING.md](CONTRIBUTING.md)).
 
-## UI Improvements
-- [ ] **Statistics dashboard**: Show usage patterns and blocked attempts
-- [ ] **Categories**: Organize blocked domains into groups
-- [ ] **Bulk import/export**: Manage large domain lists easily
+## Blocking
+- [ ] **Allowlist**: allow specific pages or subdomains of a blocked domain
+- [ ] **Pause / snooze**: temporarily unblock, with some friction so it isn't too easy
+- [ ] **Schedules**: switch profiles automatically (e.g. Work on weekdays 9–5)
+- [ ] **"Block this site" button** in the popup
+- [ ] **Advanced matching**: block specific paths, not just whole domains
 
-## Technical Improvements
-- [ ] **Local storage fallback**: Use chrome.storage.local if sync fails
-- [ ] **Content script optimization**: Improve performance on page load
-- [ ] **Error handling**: Better user feedback when things go wrong
+## Insight
+- [ ] **Local statistics**: how often each site was blocked, stored only in your browser
 
-## Publishing
-- [x] Chrome Web Store listing
-- [x] Firefox version
-- [ ] Privacy policy page
+## Reach
+- [ ] **Translations**
+
+## Done
+- [x] Firefox support (1.4)
+- [x] Profiles (1.6)
+- [x] Chrome Web Store and Firefox Add-ons listings
+- [x] Import/export to a file, dark mode, accessibility, privacy policy (3.0)
